@@ -94,7 +94,7 @@ const STEPS = [
 
 const APP_METHODS: { id: keyof AppMethods; label: string; desc: string }[] = [
   { id: 'byCv', label: 'Apply With CV', desc: 'Allow candidates to submit a resume' },
-  { id: 'byProfile', label: 'Apply With Profile', desc: 'Use Gighub applicant profile' },
+  { id: 'byProfile', label: 'Apply With Profile', desc: 'Use Mune Work applicant profile' },
   { id: 'byPortfolio', label: 'Apply With Portfolio', desc: 'Request work samples' },
   { id: 'byCoverLetter', label: 'Apply With Cover Letter', desc: 'Require a cover letter' },
   { id: 'byVideo', label: 'Apply With Video', desc: 'Request video introduction' },

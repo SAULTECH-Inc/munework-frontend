@@ -45,8 +45,8 @@ export function ChatWidget() {
       id: 'welcome',
       sender: 'ai',
       text: user?.userType === 'employer'
-        ? "Hello! 👋 I'm your Gighub AI Hiring Assistant. Ask me to search for candidates matching your job requirements or analyze top skills!"
-        : "Hello! 👋 I'm your Gighub AI Career Assistant. Ask me to find matching jobs, evaluate your match scores, or optimize your application strategy!",
+        ? "Hello! 👋 I'm your Mune Work AI Hiring Assistant. Ask me to search for candidates matching your job requirements or analyze top skills!"
+        : "Hello! 👋 I'm your Mune Work AI Career Assistant. Ask me to find matching jobs, evaluate your match scores, or optimize your application strategy!",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -207,7 +207,7 @@ export function ChatWidget() {
                     {activeConv?.otherParticipant?.name ?? 'Back to list'}
                   </button>
                 ) : (
-                  <p className="text-xs font-bold text-foreground">Gighub Chat & Assistant</p>
+                  <p className="text-xs font-bold text-foreground">Mune Work Chat & Assistant</p>
                 )}
                 <button onClick={closeChat} className="text-muted-foreground hover:text-foreground">
                   <X className="h-3.5 w-3.5" />
@@ -350,7 +350,7 @@ export function ChatWidget() {
                   {sendAiChat.isPending && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-surface border border-border px-3 py-2 rounded-2xl w-fit">
                       <Sparkles className="h-3.5 w-3.5 text-primary animate-spin" />
-                      Gighub AI is thinking & searching…
+                      Mune Work AI is thinking & searching…
                     </div>
                   )}
                   <div ref={bottomRef} />

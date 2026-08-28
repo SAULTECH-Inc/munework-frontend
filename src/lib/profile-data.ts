@@ -91,7 +91,7 @@ export const COUNTRIES: string[] = [
   'Zambia', 'Zimbabwe',
 ];
 
-// ─── Skills (sourced from the original Gighub skills list) ────────────────────
+// ─── Skills (sourced from the original Mune Work skills list) ────────────────────
 
 export const SKILLS: string[] = [
   // Soft skills

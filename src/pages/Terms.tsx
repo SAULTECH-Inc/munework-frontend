@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils';
 
 const LAST_UPDATED = 'June 18, 2025';
 const VERSION = '3.0';
-const LEGAL_EMAIL = 'legal@gighub.io';
-const SUPPORT_EMAIL = 'support@gighub.io';
-const SUPPORT_PHONE = '+1 (800) GIG-HUBX';
+const LEGAL_EMAIL = 'legal@munework.com';
+const SUPPORT_EMAIL = 'support@munework.com';
+const SUPPORT_PHONE = '+1 (800) MUNE-WORK';
 
 interface Section {
   id: string;
@@ -29,12 +29,12 @@ const SECTIONS: Section[] = [
     content: (
       <>
         <p className="mb-3 text-sm text-muted-foreground leading-relaxed">
-          By accessing or using GigHub's platform, services, or applications (collectively, the "Service"), you agree to
+          By accessing or using Mune Work's platform, services, or applications (collectively, the "Service"), you agree to
           be bound by these Terms and Conditions ("Terms"). If you do not agree to these Terms, you may not access or
           use the Service.
         </p>
         <p className="mb-3 text-sm text-muted-foreground leading-relaxed">
-          These Terms constitute a legally binding agreement between you and GigHub, Inc. ("GigHub", "we", "us", or
+          These Terms constitute a legally binding agreement between you and Mune Work, Inc. ("Mune Work", "we", "us", or
           "our"). By creating an account or using any part of our Service, you confirm that you are at least 18 years
           of age and have the legal capacity to enter into this agreement.
         </p>
@@ -52,7 +52,7 @@ const SECTIONS: Section[] = [
     content: (
       <>
         <p className="mb-3 text-sm text-muted-foreground leading-relaxed">
-          GigHub is a professional career platform that connects job seekers with employers through intelligent matching
+          Mune Work is a professional career platform that connects job seekers with employers through intelligent matching
           technology, automated application systems, and professional networking tools. Our services include:
         </p>
         <ul className="mb-3 list-disc list-inside space-y-1.5 text-sm text-muted-foreground">
@@ -91,7 +91,7 @@ const SECTIONS: Section[] = [
           <li>Maintain a single account per individual or organization</li>
         </ul>
         <HighlightBox type="warning">
-          <strong>Note:</strong> GigHub reserves the right to suspend or terminate accounts that violate these Terms or
+          <strong>Note:</strong> Mune Work reserves the right to suspend or terminate accounts that violate these Terms or
           provide false information.
         </HighlightBox>
       </>
@@ -161,7 +161,7 @@ const SECTIONS: Section[] = [
       <>
         <h4 className="text-sm font-semibold text-foreground mb-2">Subscription Plans</h4>
         <p className="mb-3 text-sm text-muted-foreground leading-relaxed">
-          GigHub offers various subscription tiers for enhanced features:
+          Mune Work offers various subscription tiers for enhanced features:
         </p>
         <ul className="mb-3 list-disc list-inside space-y-1.5 text-sm text-muted-foreground">
           <li><strong>Basic (Free):</strong> Profile creation, job search, and basic networking</li>
@@ -209,7 +209,7 @@ const SECTIONS: Section[] = [
     content: (
       <>
         <p className="mb-3 text-sm text-muted-foreground leading-relaxed">
-          GigHub's networking features allow you to connect with industry professionals, join professional groups,
+          Mune Work's networking features allow you to connect with industry professionals, join professional groups,
           participate in career discussions, and build your professional brand.
         </p>
         <h4 className="text-sm font-semibold text-foreground mb-2">Networking Guidelines</h4>
@@ -247,7 +247,7 @@ const SECTIONS: Section[] = [
     content: (
       <>
         <p className="mb-3 text-sm text-muted-foreground leading-relaxed">
-          GigHub operates on a freemium model with optional premium subscriptions:
+          Mune Work operates on a freemium model with optional premium subscriptions:
         </p>
         <ul className="mb-3 list-disc list-inside space-y-1.5 text-sm text-muted-foreground">
           <li>Basic job search and networking: Free</li>
@@ -275,7 +275,7 @@ const SECTIONS: Section[] = [
         </p>
         <h4 className="text-sm font-semibold text-foreground mb-2">Platform Disputes</h4>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Issues with GigHub services should first be reported through our support system. For unresolved matters,
+          Issues with Mune Work services should first be reported through our support system. For unresolved matters,
           binding arbitration may be required as outlined in our complete terms.
         </p>
       </>
@@ -288,7 +288,7 @@ const SECTIONS: Section[] = [
     content: (
       <>
         <HighlightBox type="warning">
-          <strong>Important:</strong> GigHub facilitates connections between job seekers and employers but cannot
+          <strong>Important:</strong> Mune Work facilitates connections between job seekers and employers but cannot
           guarantee job placement, interview success, or hiring outcomes.
         </HighlightBox>
         <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
@@ -326,7 +326,7 @@ const SECTIONS: Section[] = [
           changes will be communicated via email and platform notifications at least 30 days before taking effect.
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Continued use of GigHub after changes constitutes acceptance of the updated Terms.
+          Continued use of Mune Work after changes constitutes acceptance of the updated Terms.
         </p>
       </>
     ),
@@ -513,7 +513,7 @@ export default function TermsPage() {
             {/* Footer */}
             {!search && (
               <div className="mt-8 pt-6 border-t border-border text-center space-y-2">
-                <p className="text-sm text-muted-foreground">© 2025 GigHub, Inc. All rights reserved.</p>
+                <p className="text-sm text-muted-foreground">© 2025 Mune Work, Inc. All rights reserved.</p>
                 <p className="text-xs text-muted-foreground">Empowering careers and connecting talent worldwide</p>
                 <div className="flex justify-center gap-6 text-xs mt-3">
                   <span className="text-primary font-medium">Job Search</span>

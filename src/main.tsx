@@ -1,3 +1,4 @@
+import './lib/legacy-storage'; // must precede the stores — see module docs
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';

@@ -2208,7 +2208,7 @@ const APPLICANT_NOTIF_GROUPS = [
   {
     id: 'platform', group: 'Platform', icon: Bell,
     items: [
-      { key: 'platProduct', label: 'Product updates', desc: 'New features and announcements from Gighub' },
+      { key: 'platProduct', label: 'Product updates', desc: 'New features and announcements from Mune Work' },
       { key: 'platMaint',   label: 'Maintenance',     desc: 'Scheduled maintenance and downtime alerts' },
     ],
     channels: [{ key: 'platEmail', label: 'Email' }, { key: 'platPush', label: 'Push' }],
@@ -2227,7 +2227,7 @@ const APPLICANT_NOTIF_GROUPS = [
   {
     id: 'communication', group: 'Communication', icon: Mail,
     items: [
-      { key: 'comPromo',    label: 'Promotional offers', desc: 'Special offers and promotions from Gighub' },
+      { key: 'comPromo',    label: 'Promotional offers', desc: 'Special offers and promotions from Mune Work' },
       { key: 'comPlatform', label: 'Platform updates',   desc: 'Updates and news from the platform' },
     ],
     channels: [{ key: 'comEmail', label: 'Email' }],

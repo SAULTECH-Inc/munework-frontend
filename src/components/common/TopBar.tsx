@@ -71,7 +71,7 @@ export function TopBar({ title, actions }: TopBarProps) {
 
         <div className="flex flex-col min-w-0">
           <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium truncate">
-            <span>GigHub</span>
+            <span>Mune Work</span>
             <span>/</span>
             <span className="capitalize">{user?.userType === 'employer' ? 'Employer' : 'Talent'}</span>
             <span>/</span>

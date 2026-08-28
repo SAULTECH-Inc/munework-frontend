@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>()(
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {
-      name: 'gighub-auth',
+      name: 'munework-auth',
       partialize: (s) => ({ user: s.user, accessToken: s.accessToken, isAuthenticated: s.isAuthenticated }),
       onRehydrateStorage: () => (state) => {
         state?._setHasHydrated(true);

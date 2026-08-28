@@ -269,7 +269,7 @@ function MethodStep({ onSelect, aiText, setAiText, onAI, aiLoading }: {
         {[
           { m: 'manual' as BuildMethod, icon: User, label: 'Start from scratch', desc: 'Fill in all sections manually at your own pace' },
           { m: 'ai' as BuildMethod, icon: Sparkles, label: 'Generate with AI', desc: 'Describe your background and let AI structure your CV' },
-          { m: 'import' as BuildMethod, icon: Import, label: 'Import from profile', desc: 'Pull data from your existing Gighub profile' },
+          { m: 'import' as BuildMethod, icon: Import, label: 'Import from profile', desc: 'Pull data from your existing Mune Work profile' },
         ].map(({ m, icon: Icon, label, desc }) => (
           <button
             key={m}

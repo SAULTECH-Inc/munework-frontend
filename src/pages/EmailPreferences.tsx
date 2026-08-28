@@ -90,7 +90,7 @@ export default function EmailPreferencesPage() {
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState<Record<string, boolean>>(() => {
     try {
-      const stored = localStorage.getItem('gighub_email_prefs');
+      const stored = localStorage.getItem('munework_email_prefs');
       return stored ? { ...DEFAULTS, ...JSON.parse(stored) } : { ...DEFAULTS };
     } catch { return { ...DEFAULTS }; }
   });
@@ -107,7 +107,7 @@ export default function EmailPreferencesPage() {
 
   const handleSave = () => {
     setSaving(true);
-    localStorage.setItem('gighub_email_prefs', JSON.stringify(prefs));
+    localStorage.setItem('munework_email_prefs', JSON.stringify(prefs));
     setTimeout(() => { setSaving(false); toast.success('Email preferences saved'); }, 500);
   };
 
@@ -191,7 +191,7 @@ export default function EmailPreferencesPage() {
         <div className="text-center py-4 space-y-2">
           <p className="text-xs text-muted-foreground">Want to stop all emails? You can also</p>
           <button onClick={() => navigate('/unsubscribe')} className="text-xs text-destructive hover:underline">
-            Unsubscribe from all GigHub emails
+            Unsubscribe from all Mune Work emails
           </button>
         </div>
       </div>

@@ -16,7 +16,7 @@ interface UiState {
 // so there's no flash of wrong theme.
 const savedTheme = (() => {
   try {
-    const raw = localStorage.getItem('gighub-ui-store');
+    const raw = localStorage.getItem('munework-ui-store');
     if (raw) {
       const parsed = JSON.parse(raw);
       return parsed?.state?.theme as 'dark' | 'light' | undefined;
@@ -54,7 +54,7 @@ export const useUiStore = create<UiState>()(
       closeChat: () => set({ chatOpen: false, activeChatConvId: null }),
     }),
     {
-      name: 'gighub-ui-store',
+      name: 'munework-ui-store',
       // Only persist theme and sidebarCollapsed — not transient UI state
       partialize: (s) => ({ theme: s.theme, sidebarCollapsed: s.sidebarCollapsed }),
     },

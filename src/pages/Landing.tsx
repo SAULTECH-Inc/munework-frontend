@@ -30,7 +30,7 @@ const CATEGORIES = [
 
 const SEEKER_STEPS = [
   { icon: FileText, title: 'Upload your CV',             body: 'Our AI parses your resume and builds your profile in seconds.' },
-  { icon: Sparkles, title: 'Get matched instantly',      body: 'Gighub scores every job against your skills and experience.' },
+  { icon: Sparkles, title: 'Get matched instantly',      body: 'Mune Work scores every job against your skills and experience.' },
   { icon: Zap,      title: 'Auto-apply while you sleep', body: 'Set your preferences and let the AI apply to matching roles.' },
   { icon: Award,    title: 'Show up for interviews',     body: 'Get notified when employers want to meet — skip the guesswork.' },
 ];
@@ -43,17 +43,17 @@ const EMPLOYER_STEPS = [
 ];
 
 const FEATURES = [
-  { icon: Zap,           title: 'Auto-Apply',          body: 'Set preferences once. Gighub applies to matching jobs on your behalf — you only show up for interviews.' },
+  { icon: Zap,           title: 'Auto-Apply',          body: 'Set preferences once. Mune Work applies to matching jobs on your behalf — you only show up for interviews.' },
   { icon: Sparkles,      title: 'AI Job Matching',     body: 'Our AI reads your CV and scores every job for fit. No more guessing if you\'re qualified.' },
   { icon: Shield,        title: 'Smart Screening',     body: 'Employers get AI-ranked candidate lists with match scores so they can focus on the best fits.' },
-  { icon: MessageSquare, title: 'Built-in Messaging',  body: 'Applicants and employers communicate directly inside Gighub — no email chains.' },
+  { icon: MessageSquare, title: 'Built-in Messaging',  body: 'Applicants and employers communicate directly inside Mune Work — no email chains.' },
   { icon: TrendingUp,    title: 'Analytics & Insights', body: 'Track your application pipeline, conversion rates, and hiring funnel in real time.' },
   { icon: Globe,         title: 'Remote-First Ready',  body: 'Filter for remote, hybrid, or on-site roles globally. Location is no longer a barrier.' },
 ];
 
 const TESTIMONIALS = [
   {
-    quote: 'Gighub auto-applied to 40 roles in my first week. I got 6 interviews. I would never have found time to do that manually.',
+    quote: 'Mune Work auto-applied to 40 roles in my first week. I got 6 interviews. I would never have found time to do that manually.',
     name: 'Amara O.',
     title: 'Frontend Developer, Lagos',
     avatar: '',
@@ -71,7 +71,7 @@ const TESTIMONIALS = [
     avatar: '',
   },
   {
-    quote: "As a small team we can't afford a recruiter. Gighub is our recruiter — and it's 10x cheaper.",
+    quote: "As a small team we can't afford a recruiter. Mune Work is our recruiter — and it's 10x cheaper.",
     name: 'Emmanuel R.',
     title: 'CTO, Early-Stage Startup',
     avatar: '',
@@ -188,7 +188,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-            Gighub auto-applies to matching jobs, screens candidates intelligently,<br className="hidden sm:block" />
+            Mune Work auto-applies to matching jobs, screens candidates intelligently,<br className="hidden sm:block" />
             and connects the right people — without the endless scrolling.
           </p>
 
@@ -248,7 +248,7 @@ export default function LandingPage() {
                 <div className="h-3 w-3 rounded-full bg-destructive/60" />
                 <div className="h-3 w-3 rounded-full bg-warning/60" />
                 <div className="h-3 w-3 rounded-full bg-success/60" />
-                <span className="text-xs font-semibold text-muted-foreground ml-2 font-mono">Gighub AI Matching Engine v2.4</span>
+                <span className="text-xs font-semibold text-muted-foreground ml-2 font-mono">Mune Work AI Matching Engine v2.4</span>
               </div>
               <Badge variant="outline" className="gap-1.5 border-success/30 text-success bg-success/10 px-3 py-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-success animate-ping" />
@@ -360,7 +360,7 @@ export default function LandingPage() {
             <span className="text-xs font-semibold text-primary tracking-wide">Platform features</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-3 font-['Outfit',sans-serif]">Everything you need to get hired — or hire</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto text-sm leading-relaxed">From auto-apply to AI screening, Gighub replaces the manual grind with intelligent automation.</p>
+          <p className="text-muted-foreground max-w-xl mx-auto text-sm leading-relaxed">From auto-apply to AI screening, Mune Work replaces the manual grind with intelligent automation.</p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -387,7 +387,7 @@ export default function LandingPage() {
       <section id="how" className="bg-surface/40 border-y border-border/40 py-24 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-['Outfit',sans-serif]">How Gighub works</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-['Outfit',sans-serif]">How Mune Work works</h2>
             <p className="text-muted-foreground text-sm mb-7 font-medium">Built for both sides of the hiring table.</p>
             {/* Toggle tabs */}
             <div className="inline-flex border border-border/60 rounded-xl overflow-hidden p-1 bg-background/50 backdrop-blur-sm">
@@ -692,7 +692,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Gighub — All rights reserved</p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Mune Work — All rights reserved</p>
             <p className="text-xs text-muted-foreground">Made with AI, for humans.</p>
           </div>
         </div>

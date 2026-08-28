@@ -158,8 +158,8 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('gighub_remember_email');
-    const isRemembered = localStorage.getItem('gighub_remember_me') === 'true';
+    const savedEmail = localStorage.getItem('munework_remember_email');
+    const isRemembered = localStorage.getItem('munework_remember_me') === 'true';
     if (savedEmail && isRemembered) {
       setValue('email', savedEmail);
       setValue('rememberMe', true);
@@ -176,11 +176,11 @@ export default function LoginPage() {
     setLoading(true);
     setLoginError('');
     if (data.rememberMe) {
-      localStorage.setItem('gighub_remember_email', data.email);
-      localStorage.setItem('gighub_remember_me', 'true');
+      localStorage.setItem('munework_remember_email', data.email);
+      localStorage.setItem('munework_remember_me', 'true');
     } else {
-      localStorage.removeItem('gighub_remember_email');
-      localStorage.removeItem('gighub_remember_me');
+      localStorage.removeItem('munework_remember_email');
+      localStorage.removeItem('munework_remember_me');
     }
     try {
       const res = await authApi.login({

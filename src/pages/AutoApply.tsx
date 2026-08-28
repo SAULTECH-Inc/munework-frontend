@@ -139,7 +139,7 @@ export default function AutoApplyPage() {
               </div>
               <h1 className="text-2xl md:text-3xl font-black text-foreground font-['Outfit',sans-serif]">Auto-Apply Bot</h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                Set your preferences, minimum match score thresholds, and let GigHub automatically apply to matching jobs in the background.
+                Set your preferences, minimum match score thresholds, and let Mune Work automatically apply to matching jobs in the background.
               </p>
             </div>
 
@@ -342,7 +342,7 @@ export default function AutoApplyPage() {
                   </div>
                   <p className="text-sm font-bold text-foreground">No automated applications yet</p>
                   <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                    Once Enabled, GigHub will automatically submit applications to matching jobs and list them here.
+                    Once Enabled, Mune Work will automatically submit applications to matching jobs and list them here.
                   </p>
                 </div>
               ) : (

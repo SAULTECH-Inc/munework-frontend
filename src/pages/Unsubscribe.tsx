@@ -30,7 +30,7 @@ export default function UnsubscribePage() {
       if (token) {
         await api.post('/notifications/unsubscribe', { token, reason });
       }
-      localStorage.setItem('gighub_email_prefs', JSON.stringify(
+      localStorage.setItem('munework_email_prefs', JSON.stringify(
         Object.fromEntries(
           ['new_job_match','saved_job_alert','company_new_job','app_viewed','app_status',
            'app_shortlisted','app_rejected','interview_invite','interview_remind','interview_cancel',
@@ -68,7 +68,7 @@ export default function UnsubscribePage() {
             </Button>
           </div>
           <button onClick={() => navigate('/')} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to GigHub
+            ← Back to Mune Work
           </button>
         </div>
       </div>
@@ -87,11 +87,11 @@ export default function UnsubscribePage() {
           <h1 className="text-xl font-bold text-foreground">Unsubscribe</h1>
           {email ? (
             <p className="text-sm text-muted-foreground">
-              You are about to unsubscribe <strong className="text-foreground">{email}</strong> from all GigHub marketing emails.
+              You are about to unsubscribe <strong className="text-foreground">{email}</strong> from all Mune Work marketing emails.
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              You are about to unsubscribe from all GigHub marketing emails.
+              You are about to unsubscribe from all Mune Work marketing emails.
             </p>
           )}
         </div>

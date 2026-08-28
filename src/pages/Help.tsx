@@ -16,17 +16,17 @@ import toast from 'react-hot-toast';
 
 const FAQS = [
   // getting-started
-  { id: 1,  category: 'getting-started', question: 'How do I create my Gighub account?',                    answer: "Click 'Sign Up', choose Job Seeker or Employer, fill in your details, verify your email and you're ready. The whole process takes under 2 minutes." },
+  { id: 1,  category: 'getting-started', question: 'How do I create my Mune Work account?',                    answer: "Click 'Sign Up', choose Job Seeker or Employer, fill in your details, verify your email and you're ready. The whole process takes under 2 minutes." },
   { id: 2,  category: 'getting-started', question: 'How do I verify my email address?',                     answer: 'After signing up, we send a 6-digit OTP to your email. Enter it on the verification screen. OTPs are valid for 10 minutes — check your spam folder if you don\'t see it.' },
   { id: 3,  category: 'getting-started', question: 'Can I use Google or LinkedIn to sign in?',              answer: 'Yes! Click "Continue with Google" or "Continue with LinkedIn" on the login screen. Your account is linked automatically on first sign-in.' },
   { id: 4,  category: 'getting-started', question: 'What is the difference between Applicant and Employer accounts?', answer: 'Applicant accounts let you search jobs, apply, use Auto Apply, manage your CV, and track interviews. Employer accounts let you post jobs, manage applications, shortlist candidates, and view analytics.' },
   { id: 5,  category: 'getting-started', question: 'How do I reset my password?',                           answer: 'Click "Forgot password" on the login page. Enter your email, receive the OTP (valid 10 minutes), enter it, and set a new password. If expired, request a new OTP.' },
   { id: 6,  category: 'getting-started', question: 'Can I switch between Applicant and Employer roles?',    answer: 'Not directly — each role requires a separate account. If you need both, create two accounts with different email addresses.' },
-  { id: 7,  category: 'getting-started', question: 'Is my data safe on Gighub?',                           answer: 'Yes. We encrypt data in transit (TLS) and at rest. We never sell your personal data to third parties. You can delete your account and all associated data at any time from Settings → Danger Zone.' },
+  { id: 7,  category: 'getting-started', question: 'Is my data safe on Mune Work?',                           answer: 'Yes. We encrypt data in transit (TLS) and at rest. We never sell your personal data to third parties. You can delete your account and all associated data at any time from Settings → Danger Zone.' },
 
   // job-search
   { id: 8,  category: 'job-search', question: 'How do I search and filter jobs?',                          answer: 'Go to the Jobs page. Use the search bar for keywords, then filter by job type (full-time, contract, remote), location, salary range, experience level, and employment type. Your filters are remembered per session.' },
-  { id: 9,  category: 'job-search', question: 'What types of jobs are available on Gighub?',               answer: 'Full-time, part-time, contract, freelance, internship, hybrid, and remote jobs across all industries. Locations span Nigeria and international markets.' },
+  { id: 9,  category: 'job-search', question: 'What types of jobs are available on Mune Work?',               answer: 'Full-time, part-time, contract, freelance, internship, hybrid, and remote jobs across all industries. Locations span Nigeria and international markets.' },
   { id: 10, category: 'job-search', question: 'How do I save jobs to apply later?',                        answer: 'Click the bookmark icon on any job card or job detail page. Saved jobs appear under "Saved Jobs" in the sidebar.' },
   { id: 11, category: 'job-search', question: 'How do I improve my job match score?',                      answer: 'Complete your profile 100%, add relevant skills, upload an updated CV, and set accurate preferences (location, salary, job type). Our AI uses all of these signals.' },
   { id: 12, category: 'job-search', question: 'Can I apply with a cover letter?',                          answer: 'Yes. When applying, you can type a custom cover letter, use one you\'ve saved previously, or generate one with AI. Cover letters improve your match score.' },
@@ -61,7 +61,7 @@ const FAQS = [
   { id: 31, category: 'employers', question: 'How do I review applications?',                              answer: 'Go to Employer → Jobs → click a job → View Applications. See each applicant\'s CV, match score, cover letter, and screening answers. Use the status panel to shortlist, reject, or schedule interviews.' },
   { id: 32, category: 'employers', question: 'What are Screening Questions?',                              answer: 'When posting a job, you can add custom screening questions (text, yes/no, multiple choice). Applicants answer these during the apply flow, and their answers appear in the application review.' },
   { id: 33, category: 'employers', question: 'How does AI auto-shortlisting work?',                        answer: 'In AI Settings when posting a job, enable "Auto-shortlist" and set a threshold (e.g. 80%). Applications scoring above this are automatically moved to Shortlisted — saving you hours of manual review.' },
-  { id: 34, category: 'employers', question: 'Can I schedule interviews through Gighub?',                  answer: 'Yes. From the application detail, click "Schedule interview". Set the date, time, type (video/in-person), and a meeting link. The applicant gets a notification and calendar invite.' },
+  { id: 34, category: 'employers', question: 'Can I schedule interviews through Mune Work?',                  answer: 'Yes. From the application detail, click "Schedule interview". Set the date, time, type (video/in-person), and a meeting link. The applicant gets a notification and calendar invite.' },
   { id: 35, category: 'employers', question: 'What is Candidate Scout?',                                   answer: 'Candidate Scout lets you proactively search for talent by skills, location, experience, and job level — even before they apply to your jobs. It\'s available on paid plans.' },
 ];
 
@@ -138,7 +138,7 @@ export default function HelpPage() {
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
             <Mail className="h-3 w-3" />
             <span>Email us at</span>
-            <a href="mailto:support@gighub.co" className="text-primary hover:underline font-medium">support@gighub.co</a>
+            <a href="mailto:support@munework.com" className="text-primary hover:underline font-medium">support@munework.com</a>
             <span>·</span>
             <Clock className="h-3 w-3" />
             <span>Response within 24 h</span>
@@ -231,8 +231,8 @@ export default function HelpPage() {
               <Mail className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Contact Support</h3>
             </div>
-            <a href="mailto:support@gighub.co" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
-              <ExternalLink className="h-3 w-3" /> support@gighub.co
+            <a href="mailto:support@munework.com" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+              <ExternalLink className="h-3 w-3" /> support@munework.com
             </a>
           </div>
 
@@ -286,7 +286,7 @@ export default function HelpPage() {
       {modal === 'demo' && (
         <Modal title="Schedule a Demo" onClose={() => setModal(null)}>
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Get a personalized 30-minute walkthrough of Gighub's features with one of our team members.</p>
+            <p className="text-xs text-muted-foreground">Get a personalized 30-minute walkthrough of Mune Work's features with one of our team members.</p>
             <div className="grid sm:grid-cols-2 gap-3">
               <LabelInput label="Name" placeholder="Your name" value={demoForm.name} onChange={v => setDemoForm(p => ({ ...p, name: v }))} />
               <LabelInput label="Email" type="email" placeholder="your@email.com" value={demoForm.email} onChange={v => setDemoForm(p => ({ ...p, email: v }))} />
