@@ -1,6 +1,6 @@
 {
-  "name": "Gighub",
-  "short_name": "Gighub",
+  "name": "Mune Work",
+  "short_name": "Mune Work",
   "description": "AI-powered job matching platform",
   "start_url": "/",
   "display": "standalone",

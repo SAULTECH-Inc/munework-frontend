@@ -124,10 +124,10 @@ function LogoBadge() {
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_4px_20px_hsl(262_83%_58%/0.35)]">
-        <span className="text-white font-bold text-lg font-['Outfit',sans-serif]">G</span>
+        <span className="text-white font-bold text-lg font-['Outfit',sans-serif]">M</span>
       </div>
       <span className="font-bold text-xl tracking-tight font-['Outfit',sans-serif]">
-        Gig<span className="text-gradient">hub</span>
+        Mune <span className="text-gradient">Work</span>
       </span>
     </div>
   );

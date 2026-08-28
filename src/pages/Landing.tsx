@@ -146,10 +146,10 @@ export default function LandingPage() {
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_2px_12px_hsl(262_83%_58%/0.3)]">
-              <span className="text-white font-bold text-xs font-['Outfit',sans-serif]">G</span>
+              <span className="text-white font-bold text-xs font-['Outfit',sans-serif]">M</span>
             </div>
             <span className="font-bold text-[15px] tracking-tight font-['Outfit',sans-serif]">
-              Gig<span className="text-gradient">hub</span>
+              Mune <span className="text-gradient">Work</span>
             </span>
           </div>
 
@@ -658,9 +658,9 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <span className="text-white font-bold text-[10px]">G</span>
+                  <span className="text-white font-bold text-[10px]">M</span>
                 </div>
-                <span className="font-bold text-sm font-['Outfit',sans-serif]">Gig<span className="text-gradient">hub</span></span>
+                <span className="font-bold text-sm font-['Outfit',sans-serif]">Mune <span className="text-gradient">Work</span></span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">AI-powered job matching platform built for the modern workforce.</p>
             </div>

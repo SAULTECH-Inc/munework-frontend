@@ -6,7 +6,7 @@ export default function ResetSuccessPage() {
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <span className="text-2xl font-bold">Gig<span className="text-primary">hub</span></span>
+        <span className="text-2xl font-bold">Mune <span className="text-primary">Work</span></span>
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-8 text-center space-y-5">

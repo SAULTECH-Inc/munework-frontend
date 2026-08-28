@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gighub-v2';
+const CACHE_NAME = 'munework-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

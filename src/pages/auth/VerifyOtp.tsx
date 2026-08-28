@@ -102,7 +102,7 @@ export default function VerifyOtpPage() {
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <span className="text-2xl font-bold">Gig<span className="text-primary">hub</span></span>
+        <span className="text-2xl font-bold">Mune <span className="text-primary">Work</span></span>
         <p className="text-sm text-muted-foreground mt-1">Verify your email</p>
       </div>
 

@@ -132,16 +132,16 @@ export function Sidebar() {
       )}>
         {sidebarCollapsed ? (
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_2px_12px_hsl(262_83%_58%/0.35)]">
-            <span className="text-white font-bold text-sm font-['Outfit',sans-serif]">G</span>
+            <span className="text-white font-bold text-sm font-['Outfit',sans-serif]">M</span>
           </div>
         ) : (
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_2px_12px_hsl(262_83%_58%/0.35)]">
-              <span className="text-white font-bold text-sm font-['Outfit',sans-serif]">G</span>
+              <span className="text-white font-bold text-sm font-['Outfit',sans-serif]">M</span>
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-base tracking-tight font-['Outfit',sans-serif] leading-none">
-                Gig<span className="text-gradient">hub</span>
+                Mune <span className="text-gradient">Work</span>
               </span>
               <span className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase mt-0.5">
                 {user?.userType === 'employer' ? 'Employer Hub' : 'Talent Suite'}

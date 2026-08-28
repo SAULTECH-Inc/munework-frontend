@@ -65,7 +65,7 @@ export function TopBar({ title, actions }: TopBarProps) {
         {/* Mobile Brand Logo Mark */}
         <div className="md:hidden flex items-center gap-2">
           <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-xs font-['Outfit',sans-serif]">G</span>
+            <span className="text-white font-bold text-xs font-['Outfit',sans-serif]">M</span>
           </div>
         </div>
 
