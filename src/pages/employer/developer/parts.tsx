@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /** Label + control, matching the spacing the rest of the app uses in forms. */
@@ -74,15 +75,54 @@ export function Stat({
   );
 }
 
-/** Monospace block for endpoints, payloads and shell snippets. */
-export function Code({ children, className }: { children: ReactNode; className?: string }) {
+/**
+ * Monospace block with a copy button — every snippet on this page is meant to
+ * be pasted into an editor, so none of them should have to be retyped.
+ */
+export function Code({
+  children,
+  className,
+  label,
+}: {
+  children: string;
+  className?: string;
+  label?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = () => {
+    navigator.clipboard.writeText(children);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  };
+
   return (
-    <pre className={cn(
-      'rounded-lg bg-muted border border-border p-3 text-[11px] leading-relaxed font-mono overflow-x-auto text-foreground/90',
-      className,
-    )}>
-      {children}
-    </pre>
+    <div className={cn('relative group', className)}>
+      {label && (
+        <div className="flex items-center justify-between px-3 py-1.5 rounded-t-lg bg-muted border border-b-0 border-border">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        </div>
+      )}
+      <pre className={cn(
+        'bg-muted border border-border p-3 pr-11 text-[11px] leading-relaxed font-mono overflow-x-auto text-foreground/90',
+        label ? 'rounded-b-lg' : 'rounded-lg',
+      )}>
+        {children}
+      </pre>
+      <button
+        onClick={copy}
+        title="Copy"
+        className={cn(
+          'absolute right-2 p-1.5 rounded-md border border-border bg-surface-raised transition-opacity',
+          label ? 'top-9' : 'top-2',
+          'opacity-0 group-hover:opacity-100 focus:opacity-100',
+        )}
+      >
+        {copied
+          ? <Check className="h-3.5 w-3.5 text-success" />
+          : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+      </button>
+    </div>
   );
 }
 

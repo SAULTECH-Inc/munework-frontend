@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  CheckCircle2, Copy, Eye, EyeOff, Plus, RefreshCw, Send, Trash2, Webhook, XCircle,
+  ArrowLeft, CheckCircle2, Copy, Eye, EyeOff, Plus, RefreshCw, Send, Trash2, Webhook, XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import {
   Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { Field } from './parts';
+import { WebhookReference } from './WebhookReference';
 import { developerApi } from '@/lib/api';
 import { cn, timeAgo } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -91,11 +92,19 @@ export function WebhooksTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <p className="text-sm text-muted-foreground max-w-xl">
-          We POST signed events to these URLs so your system stays in step without polling.
-          Every delivery is retried with backoff, and each successful one is billed.
-        </p>
+      <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+        <ArrowLeft className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <h2 className="text-base font-bold text-foreground font-['Outfit',sans-serif]">
+            We call you — outbound webhooks
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+            Everything on this tab is something <span className="text-foreground font-semibold">we push to
+            your server</span> the moment it happens: a candidate applies, a status changes, a job goes
+            live. You never poll for it. For calls your system makes to us, see the{' '}
+            <span className="text-foreground font-semibold">Documentation</span> tab.
+          </p>
+        </div>
         <Button onClick={() => setOpen(true)} className="shrink-0">
           <Plus className="h-4 w-4 mr-1.5" /> Add endpoint
         </Button>
@@ -199,6 +208,8 @@ export function WebhooksTab() {
           ))}
         </div>
       )}
+
+      <WebhookReference />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">

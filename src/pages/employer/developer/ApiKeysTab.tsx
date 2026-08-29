@@ -30,7 +30,7 @@ export function ApiKeysTab() {
   const [live, setLive] = useState(false);
   const [scopes, setScopes] = useState<SelectOption[]>(SCOPES.slice(0, 3));
   const [allowedIps, setAllowedIps] = useState('');
-  const [issued, setIssued] = useState<{ secret: string; name: string } | null>(null);
+  const [issued, setIssued] = useState<{ keyId: string; signingSecret: string; name: string } | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['developer-keys'],
@@ -51,7 +51,7 @@ export function ApiKeysTab() {
         })
         .then((r) => r.data?.data ?? r.data),
     onSuccess: (key: any) => {
-      setIssued({ secret: key.secret, name: key.name });
+      setIssued({ keyId: key.keyId, signingSecret: key.signingSecret, name: key.name });
       setOpen(false);
       setName('');
       setAllowedIps('');
@@ -63,7 +63,7 @@ export function ApiKeysTab() {
   const rotate = useMutation({
     mutationFn: (id: string) => developerApi.rotateKey(id).then((r) => r.data?.data ?? r.data),
     onSuccess: (key: any) => {
-      setIssued({ secret: key.secret, name: key.name });
+      setIssued({ keyId: key.keyId, signingSecret: key.signingSecret, name: key.name });
       invalidate();
     },
   });
@@ -81,10 +81,15 @@ export function ApiKeysTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
-        <p className="text-sm text-muted-foreground max-w-xl">
-          Keys authenticate your server against the Mune Work API. Test keys are free and never
-          write to your live pipeline; live keys draw on your credit balance.
-        </p>
+        <div className="max-w-2xl">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Each key is a <span className="text-foreground font-semibold">pair</span>: a
+            <span className="text-foreground font-semibold"> key id</span> that identifies you on every
+            request, and a <span className="text-foreground font-semibold">signing secret</span> that never
+            leaves your server — you sign requests with it rather than sending it. Test keys are free and
+            never touch live data; live keys write for real and draw on your credit balance.
+          </p>
+        </div>
         <Button onClick={() => setOpen(true)} className="shrink-0">
           <Plus className="h-4 w-4 mr-1.5" /> New key
         </Button>
@@ -112,7 +117,14 @@ export function ApiKeysTab() {
                     <Badge variant="destructive" className="text-[10px]">revoked</Badge>
                   )}
                 </div>
-                <p className="text-xs font-mono text-muted-foreground mt-1">{k.masked}</p>
+                <div className="mt-1.5 space-y-0.5">
+                  <p className="text-[11px] font-mono text-foreground/80">
+                    <span className="text-muted-foreground">key id&nbsp;&nbsp;</span>{k.keyId}
+                  </p>
+                  <p className="text-[11px] font-mono text-muted-foreground">
+                    <span className="text-muted-foreground">secret&nbsp;&nbsp;</span>{k.secretHint}
+                  </p>
+                </div>
                 <p className="text-[11px] text-muted-foreground/70 mt-1">
                   {k.scopes?.join(' · ') || 'no scopes'}
                   {k.allowedIps?.length ? ` · IPs: ${k.allowedIps.join(', ')}` : ''}
@@ -191,24 +203,45 @@ export function ApiKeysTab() {
       {/* Reveal — the only time the secret exists in the UI */}
       <Dialog open={!!issued} onOpenChange={(v) => !v && setIssued(null)}>
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader><DialogTitle>Copy your key now</DialogTitle></DialogHeader>
-          <DialogBody className="space-y-3">
+          <DialogHeader><DialogTitle>Store your signing secret now</DialogTitle></DialogHeader>
+          <DialogBody className="space-y-4">
             <div className="flex items-start gap-2.5 rounded-lg bg-warning/10 border border-warning/30 p-3">
               <ShieldAlert className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-              <p className="text-xs text-foreground/80">
-                We store only a hash of this key, so this is the one and only time it can be shown.
-                If you lose it, rotate the key to get a new one.
+              <p className="text-xs text-foreground/80 leading-relaxed">
+                The signing secret is encrypted the moment you close this dialog and can never be shown
+                again. Put it in your secret manager now. Lost it? Rotate the key — that issues a new pair
+                and revokes this one in a single step.
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <code className={cn(
-                'flex-1 rounded-lg bg-muted px-3 py-2.5 text-xs font-mono break-all',
-              )}>
-                {issued?.secret}
-              </code>
-              <Button size="sm" onClick={() => copy(issued!.secret)}>
-                <Copy className="h-3.5 w-3.5 mr-1" /> Copy
-              </Button>
+
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-foreground">Key id</p>
+              <p className="text-[11px] text-muted-foreground">
+                Send as <code className="font-mono text-foreground">X-API-KEY</code>. Public — safe in logs.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className={cn('flex-1 rounded-lg bg-muted px-3 py-2.5 text-xs font-mono break-all')}>
+                  {issued?.keyId}
+                </code>
+                <Button size="sm" variant="outline" onClick={() => copy(issued!.keyId)}>
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-foreground">Signing secret</p>
+              <p className="text-[11px] text-muted-foreground">
+                Never send this. Use it to compute <code className="font-mono text-foreground">X-SIGNATURE</code>.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className={cn('flex-1 rounded-lg bg-muted px-3 py-2.5 text-xs font-mono break-all border border-warning/40')}>
+                  {issued?.signingSecret}
+                </code>
+                <Button size="sm" onClick={() => copy(issued!.signingSecret)}>
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           </DialogBody>
           <DialogFooter>
