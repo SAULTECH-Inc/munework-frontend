@@ -1,4 +1,4 @@
-const CACHE_NAME = 'munework-v2';
+const CACHE_NAME = 'munework-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -34,11 +34,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle SPA HTML navigation requests
+  // SPA navigation: fall back to the cached shell only when offline.
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/index.html') || caches.match('/');
+      fetch(event.request).catch(async () => {
+        return (await caches.match('/index.html')) || (await caches.match('/')) ||
+          new Response('Offline', { status: 503, statusText: 'Offline' });
       })
     );
     return;
@@ -55,7 +56,12 @@ self.addEventListener('fetch', (event) => {
         }).catch(() => {});
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => caches.match('/index.html'));
+      // Never substitute the HTML shell for a script, stylesheet or image —
+      // the browser would try to parse index.html as JavaScript and fail in a
+      // way that looks nothing like the network error that actually happened.
+      return fetch(event.request).catch(
+        () => new Response('', { status: 504, statusText: 'Network unavailable' }),
+      );
     })
   );
 });
