@@ -63,7 +63,16 @@ api.interceptors.response.use(
       }
     }
 
-    const msg = err.response?.data?.message ?? 'Something went wrong';
+    // A request that never got a response is a different problem from one the
+    // server rejected, and saying so is the difference between a user knowing
+    // they are offline and staring at "Something went wrong".
+    const msg = err.response?.data?.message
+      ?? (err.response
+        ? `Request failed (${err.response.status})`
+        : err.code === 'ECONNABORTED'
+          ? 'That took too long. Check your connection and try again.'
+          : `Cannot reach the server at ${BASE}. Check your connection.`);
+
     if (err.response?.status !== 401 && !isAuthEndpoint) toast.error(msg);
     return Promise.reject(err);
   },
