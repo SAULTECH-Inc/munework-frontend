@@ -5,6 +5,7 @@ import {
   Calendar, Bookmark, Network as NetworkIcon, Zap, ClipboardList,
   HelpCircle, CreditCard, Building2, User, Target, Wand2, PenLine,
   Compass, Shield, Command,
+  Code2,
 } from 'lucide-react';
 import { cn, getInitials } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
@@ -87,6 +88,7 @@ export const EMPLOYER_GROUPS: NavGroup[] = [
     items: [
       { href: '/schedules',   icon: Calendar,      label: 'Schedules' },
       { href: '/assessments', icon: ClipboardList, label: 'Assessments' },
+      { href: '/employer/developer', icon: Code2,   label: 'Developer', badge: 'API' },
     ],
   },
   {

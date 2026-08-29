@@ -276,3 +276,30 @@ export const settingsApi = {
   updateJobPostingStatus:      (data: any)        => api.put('/settings/job-posting-status/update', data),
   updatePaymentAndBilling:     (data: any)        => api.put('/settings/payment-and-billing/update', data),
 };
+
+// ─── Developer platform ───────────────────────────────────────────────────────
+export const developerApi = {
+  // API keys — the secret is only ever returned by create/rotate
+  listKeys:      ()                    => api.get('/developer/keys'),
+  createKey:     (data: any)           => api.post('/developer/keys', data),
+  revokeKey:     (id: string)          => api.delete(`/developer/keys/${id}`),
+  rotateKey:     (id: string)          => api.post(`/developer/keys/${id}/rotate`),
+
+  // Webhooks
+  listWebhooks:  ()                    => api.get('/developer/webhooks'),
+  createWebhook: (data: any)           => api.post('/developer/webhooks', data),
+  updateWebhook: (id: string, d: any)  => api.patch(`/developer/webhooks/${id}`, d),
+  deleteWebhook: (id: string)          => api.delete(`/developer/webhooks/${id}`),
+  rotateSecret:  (id: string)          => api.post(`/developer/webhooks/${id}/rotate-secret`),
+  pingWebhook:   (id: string)          => api.post(`/developer/webhooks/${id}/ping`),
+  deliveries:    (id: string, p?: any) => api.get(`/developer/webhooks/${id}/deliveries`, { params: p }),
+  replay:        (id: string)          => api.post(`/developer/deliveries/${id}/replay`),
+
+  // Credit & usage
+  wallet:        ()                    => api.get('/developer/wallet'),
+  transactions:  (params?: any)        => api.get('/developer/wallet/transactions', { params }),
+  setThreshold:  (threshold: number)   => api.patch('/developer/wallet/threshold', { threshold }),
+  pricing:       ()                    => api.get('/developer/pricing'),
+  usage:         (days = 30)           => api.get('/developer/usage', { params: { days } }),
+  logs:          (params?: any)        => api.get('/developer/logs', { params }),
+};

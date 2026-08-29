@@ -22,6 +22,7 @@ import EmployerDashboard from '@/pages/employer/Dashboard';
 import EmployerJobsPage from '@/pages/employer/Jobs';
 import CandidatesPage from '@/pages/employer/Candidates';
 import AnalyticsPage from '@/pages/employer/Analytics';
+import DeveloperPage from '@/pages/employer/developer';
 
 import JobsPage from '@/pages/jobs/Jobs';
 import ChatPage from '@/pages/Chat';
@@ -101,6 +102,7 @@ export default function App() {
             <Route path="/employer/candidates" element={<CandidatesPage />} />
             <Route path="/employer/scout" element={<CandidateScoutPage />} />
             <Route path="/employer/analytics" element={<AnalyticsPage />} />
+            <Route path="/employer/developer" element={<DeveloperPage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/schedules" element={<SchedulesPage />} />

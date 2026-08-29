@@ -39,6 +39,7 @@ const PAGE_NAMES: Record<string, string> = {
   '/employer/candidates': 'Candidate Applications',
   '/employer/scout':      'Talent Scout AI',
   '/employer/analytics':  'Analytics & Metrics',
+  '/employer/developer':  'Developer & API',
 };
 
 export function TopBar({ title, actions }: TopBarProps) {
