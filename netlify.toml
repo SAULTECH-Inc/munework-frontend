@@ -2,6 +2,12 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  # The build needs tsc and vite, which are devDependencies. Netlify skips
+  # devDependencies whenever NODE_ENV=production, so state the requirement here
+  # rather than depending on a dashboard setting nobody remembers.
+  NPM_FLAGS = "--include=dev"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
