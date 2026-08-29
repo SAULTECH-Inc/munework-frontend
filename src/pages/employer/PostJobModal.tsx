@@ -23,6 +23,7 @@ import { jobsApi, aiApi } from '@/lib/api';
 import type { Job } from '@/types';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { FlierImport, type FlierDraft } from './FlierImport';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -289,6 +290,54 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
     }
   }
 
+  // ─── Flier import ───────────────────────────────────────────────────────────
+
+  /**
+   * Writes an extracted draft into the form. Only fields the flier actually
+   * mentioned are touched, so an employer who has already typed something does
+   * not lose it to a null.
+   */
+  function applyFlierDraft(draft: FlierDraft): number {
+    let filled = 0;
+    const set = (field: string, value: unknown) => {
+      if (value === null || value === undefined || value === '') return;
+      setValue(field as any, value as any, { shouldValidate: true });
+      filled++;
+    };
+
+    set('title', draft.title);
+    set('description', draft.description);
+    set('responsibilities', draft.responsibilities);
+    set('requirements', draft.requirements);
+    set('department', draft.department);
+    set('location', draft.location);
+    set('jobType', draft.jobType);
+    set('workMode', draft.workMode);
+    set('experienceLevel', draft.experienceLevel);
+    set('experienceYears', draft.experienceYears);
+    set('applicationDeadline', draft.applicationDeadline);
+
+    if (draft.salaryMin || draft.salaryMax) {
+      set('salaryMin', draft.salaryMin);
+      set('salaryMax', draft.salaryMax);
+      set('salaryCurrency', draft.salaryCurrency);
+      set('salaryFrequency', draft.salaryFrequency);
+      setSalaryMode(draft.salaryMin && draft.salaryMax ? 'range' : 'exact');
+    }
+
+    if (draft.skills?.length) {
+      const fresh = draft.skills
+        .filter((skill) => !skillItems.some((s) => s.value.toLowerCase() === skill.toLowerCase()))
+        .map((skill) => ({ label: skill, value: skill }));
+      if (fresh.length) {
+        setSkillItems((prev) => [...prev, ...fresh]);
+        filled++;
+      }
+    }
+
+    return filled;
+  }
+
   // ─── Submit ─────────────────────────────────────────────────────────────────
 
   const save = useMutation({
@@ -454,6 +503,8 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
             {/* ── Step 1: Job Content ── */}
             {step === 1 && (
               <div className="space-y-4">
+                {!editJob && <FlierImport onExtracted={applyFlierDraft} />}
+
                 <Field label="Job title" error={errors.title?.message} required>
                   <Input placeholder="e.g. Senior Software Engineer" {...register('title')} />
                 </Field>

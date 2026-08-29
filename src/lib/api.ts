@@ -102,6 +102,12 @@ export const jobsApi = {
   search:               (params?: any) => api.get('/jobs', { params }),
   get:                  (id: string)   => api.get(`/jobs/${id}`),
   postJob:              (data: any)    => api.post('/jobs', data),
+  /** Reads a recruitment flier and returns a pre-filled job draft plus warnings. */
+  extractFromFlier:     (form: FormData) =>
+                          api.post('/jobs/extract-from-flier', form, {
+                            headers: { 'Content-Type': 'multipart/form-data' },
+                            timeout: 90000,
+                          }),
   updateJob:            (id: string, data: any) => api.patch(`/jobs/${id}`, data),
   deleteJob:            (id: string)   => api.delete(`/jobs/${id}`),
   apply:                (id: string, data: any) => api.post(`/jobs/${id}/apply`, data),
