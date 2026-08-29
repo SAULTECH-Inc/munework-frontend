@@ -31,6 +31,7 @@ import { Switch } from '@/components/ui/switch';
 import DatePicker from '@/components/ui/date-picker';
 import RichTextEditor from '@/components/ui/rich-text-editor';
 import toast from 'react-hot-toast';
+import { WhatsAppPanel } from './settings/WhatsAppPanel';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Required'),
@@ -2363,6 +2364,8 @@ function NotificationsTab() {
           Save
         </Button>
       </div>
+
+      <WhatsAppPanel />
 
       {GROUPS.map(group => (
         <div key={group.group} className="rounded-xl border border-border bg-surface overflow-hidden">

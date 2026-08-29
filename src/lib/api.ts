@@ -309,3 +309,13 @@ export const developerApi = {
   usage:         (days = 30)           => api.get('/developer/usage', { params: { days } }),
   logs:          (params?: any)        => api.get('/developer/logs', { params }),
 };
+
+// ─── WhatsApp notifications ───────────────────────────────────────────────────
+export const whatsappApi = {
+  status:       ()                  => api.get('/whatsapp'),
+  startVerify:  (phone: string)     => api.post('/whatsapp/verify', { phone }),
+  confirm:      (code: string)      => api.post('/whatsapp/verify/confirm', { code }),
+  setDigest:    (frequency: string) => api.put('/whatsapp/digest', { frequency }),
+  optOut:       ()                  => api.delete('/whatsapp'),
+  history:      (params?: any)      => api.get('/whatsapp/history', { params }),
+};
