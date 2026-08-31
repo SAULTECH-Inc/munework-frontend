@@ -6,26 +6,38 @@ let notifSocket: Socket | null = null;
 export function connectSockets(token: string) {
   if (chatSocket?.connected && notifSocket?.connected) return;
 
+  const wsBase = import.meta.env.VITE_WS_BASE_URL || import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/v1\/?$/, '') || 'http://localhost:3000';
+
+  // If backend is running on Vercel serverless and no dedicated WebSocket URL is provided, skip socket polling
+  if (wsBase.includes('vercel.app') && !import.meta.env.VITE_WS_BASE_URL) {
+    return;
+  }
+
   const opts = {
     auth: { token },
     transports: ['websocket', 'polling'],
     reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 2000,
+    reconnectionAttempts: 2,
+    reconnectionDelay: 5000,
   };
-  const wsBase = import.meta.env.VITE_WS_BASE_URL || 'http://localhost:3000';
 
   if (!chatSocket) {
     chatSocket = io(`${wsBase}/chat`, opts);
     chatSocket.on('connect_error', () => {
-      // Quietly handle connection retry without logging errors to console during page navigation
+      // Disconnect cleanly if serverless environment doesn't support persistent sockets
+      if (chatSocket && !chatSocket.connected) {
+        chatSocket.disconnect();
+      }
     });
   }
 
   if (!notifSocket) {
     notifSocket = io(`${wsBase}/notifications`, opts);
     notifSocket.on('connect_error', () => {
-      // Quietly handle connection retry without logging errors to console during page navigation
+      // Disconnect cleanly if serverless environment doesn't support persistent sockets
+      if (notifSocket && !notifSocket.connected) {
+        notifSocket.disconnect();
+      }
     });
   }
 }
