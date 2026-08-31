@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getNotifSocket, getChatSocket } from '@/lib/socket';
 import { useUiStore } from '@/store/ui.store';
 import toast from 'react-hot-toast';
+import { initFirebaseMessaging } from '@/lib/firebase';
 
 const NOTIFICATION_ICONS: Record<string, string> = {
   job_match:             '✨',
@@ -21,6 +22,12 @@ export function AppLayout() {
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { chatOpen } = useUiStore();
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      initFirebaseMessaging();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const notifSock = getNotifSocket();

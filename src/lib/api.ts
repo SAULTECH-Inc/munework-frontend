@@ -185,10 +185,12 @@ export const usersApi = {
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 export const notificationsApi = {
-  list:        (params?: any) => api.get('/notifications', { params }),
-  markRead:    (id: string)   => api.patch(`/notifications/${id}/read`),
-  markAllRead: ()             => api.patch('/notifications/read-all'),
-  delete:      (id: string)   => api.delete(`/notifications/${id}`),
+  list:               (params?: any) => api.get('/notifications', { params }),
+  markRead:           (id: string)   => api.patch(`/notifications/${id}/read`),
+  markAllRead:        ()             => api.patch('/notifications/read-all'),
+  delete:             (id: string)   => api.delete(`/notifications/${id}`),
+  registerFcmToken:   (token: string) => api.post('/notifications/fcm-token', { token }),
+  unregisterFcmToken: (token: string) => api.delete('/notifications/fcm-token', { data: { token } }),
 };
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
