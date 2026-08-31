@@ -8,7 +8,7 @@ const firebaseConfig = {
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'mune-work.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'mune-work',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'mune-work.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '109767450778418985794',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '723511201389',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
 };
 
@@ -37,7 +37,17 @@ export async function initFirebaseMessaging() {
     // Register service worker if supported
     let swRegistration: ServiceWorkerRegistration | undefined = undefined;
     if ('serviceWorker' in navigator) {
-      swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      // A service worker is a static file outside the bundle, so the config
+      // travels on its URL rather than being hardcoded a second time.
+      const swUrl = `/firebase-messaging-sw.js?${new URLSearchParams({
+        apiKey: firebaseConfig.apiKey,
+        authDomain: firebaseConfig.authDomain,
+        projectId: firebaseConfig.projectId,
+        storageBucket: firebaseConfig.storageBucket,
+        messagingSenderId: firebaseConfig.messagingSenderId,
+        appId: firebaseConfig.appId,
+      })}`;
+      swRegistration = await navigator.serviceWorker.register(swUrl);
     }
 
     // Get FCM Token
