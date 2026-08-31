@@ -47,7 +47,26 @@ export async function initFirebaseMessaging() {
         messagingSenderId: firebaseConfig.messagingSenderId,
         appId: firebaseConfig.appId,
       })}`;
-      swRegistration = await navigator.serviceWorker.register(swUrl);
+      // A dedicated scope, matching what the Firebase SDK uses by default.
+      // Without it this registers at "/" — the same scope main.tsx uses for
+      // the PWA worker — and a scope holds only one registration, so whichever
+      // registered last wins. main.tsx runs on every load, so sw.js would take
+      // over the scope that owns the push subscription and silently swallow
+      // every push, while FCM still reported a successful send.
+      swRegistration = await navigator.serviceWorker.register(swUrl, {
+        scope: '/firebase-cloud-messaging-push-scope',
+      });
+
+      // getToken needs an activated worker; register() resolves before that.
+      if (swRegistration.active === null) {
+        await new Promise<void>((resolve) => {
+          const worker = swRegistration!.installing ?? swRegistration!.waiting;
+          if (!worker) return resolve();
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'activated') resolve();
+          });
+        });
+      }
     }
 
     // Get FCM Token
@@ -67,9 +86,9 @@ export async function initFirebaseMessaging() {
     onMessage(messaging, (payload) => {
       console.log('[FCM] Foreground notification received:', payload);
       if (payload.notification && typeof window !== 'undefined' && 'Notification' in window) {
-        new Notification(payload.notification.title || 'MuneWork', {
+        new Notification(payload.notification.title || 'Mune Work', {
           body: payload.notification.body,
-          icon: '/favicon.ico',
+          icon: '/brand/logo-mark-192.png',
         });
       }
     });
