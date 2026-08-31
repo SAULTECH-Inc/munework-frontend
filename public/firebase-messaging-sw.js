@@ -40,8 +40,9 @@ if (!firebaseConfig.apiKey || !firebaseConfig.appId) {
 
     self.registration.showNotification(title, {
       body: payload.notification?.body || '',
-      icon: '/icon.svg',
-      badge: '/icon.svg',
+      // PNG rather than SVG: Chrome does not reliably rasterize an SVG here.
+      icon: '/brand/logo-mark-192.png',
+      badge: '/brand/favicon-48.png',
       data: payload.data,
       tag: payload.data?.notificationId || undefined,
     });
