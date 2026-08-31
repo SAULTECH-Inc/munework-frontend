@@ -384,7 +384,7 @@ const JOB_TYPE_OPTIONS = [
 ];
 const PROFICIENCY_LEVELS = ['Beginner', 'Elementary', 'Intermediate', 'Advanced', 'Expert'];
 const LANGUAGE_LEVELS   = ['Basic', 'Conversational', 'Proficient', 'Fluent', 'Native'];
-const SALARY_FREQUENCIES = ['yearly', 'monthly', 'weekly', 'hourly'] as const;
+const SALARY_FREQUENCIES = ['yearly', 'monthly', 'daily', 'weekly', 'hourly'] as const;
 
 function ApplicantProfileTab() {
   const { user, updateUser } = useAuthStore();
@@ -427,6 +427,10 @@ function ApplicantProfileTab() {
       openToRelocation: p?.openToRelocation ?? false,
       desiredJobTitles: (p?.desiredJobTitles ?? []) as string[],
       jobTypes: (p?.jobTypes ?? []) as string[],
+      workTypes: (p?.workTypes ?? []) as string[],
+      preferredCompanies: (p?.preferredCompanies ?? []) as string[],
+      preferredCountries: (p?.preferredCountries ?? []) as string[],
+      preferredBenefits: (p?.preferredBenefits ?? []) as string[],
     },
   });
 
@@ -516,6 +520,7 @@ function ApplicantProfileTab() {
       references,
       preferredLocations,
       salaryRanges,
+      expectedSalaries: salaryRanges,
       portfolioLinks,
     }),
     onSuccess: (res) => {
@@ -746,8 +751,14 @@ function ApplicantProfileTab() {
                   <AddFormBox
                     onSave={() => {
                       const { currency, minAmount, maxAmount, frequency } = salaryDraft;
-                      if (currency && minAmount != null && maxAmount != null && frequency) { setSalaryRanges([...salaryRanges, salaryDraft as ProfileSalaryRange]); setSalaryDraft({ currency: 'USD', frequency: 'yearly' }); setAddingSalary(false); }
-                      else toast.error('All salary fields are required');
+                      if (!currency || minAmount == null || maxAmount == null || !frequency) { toast.error('All salary fields are required'); return; }
+                      const cleanCurr = currency.toUpperCase().trim();
+                      const cleanFreq = (frequency as string).toLowerCase().trim();
+                      const dup = salaryRanges.find(s => s.currency.toUpperCase() === cleanCurr && s.frequency.toLowerCase() === cleanFreq);
+                      if (dup) { toast.error(`${cleanCurr} (${cleanFreq}) already exists. Choose a different frequency.`); return; }
+                      setSalaryRanges([...salaryRanges, { ...salaryDraft, currency: cleanCurr, frequency: cleanFreq } as ProfileSalaryRange]);
+                      setSalaryDraft({ currency: 'USD', frequency: 'yearly' });
+                      setAddingSalary(false);
                     }}
                     onCancel={() => { setSalaryDraft({ currency: 'USD', frequency: 'yearly' }); setAddingSalary(false); }}
                   >
@@ -780,6 +791,59 @@ function ApplicantProfileTab() {
                 />
                 <span className="text-sm text-muted-foreground">{watch('openToRelocation') ? 'Yes' : 'No'}</span>
               </div>
+            </Field>
+
+            <Field label="Preferred work types">
+              <div className="flex flex-wrap gap-2 pt-1">
+                {(['REMOTE', 'ONSITE', 'HYBRID'] as const).map(wt => {
+                  const active = (watch('workTypes') ?? []).includes(wt);
+                  return (
+                    <button
+                      key={wt}
+                      type="button"
+                      onClick={() => {
+                        const current: string[] = watch('workTypes') ?? [];
+                        setValue('workTypes', active ? current.filter(w => w !== wt) : [...current, wt]);
+                      }}
+                      className={cn(
+                        'text-xs px-3 py-1 rounded-full border transition-colors',
+                        active ? 'bg-primary text-white border-primary' : 'bg-surface border-border text-muted-foreground hover:border-primary/50',
+                      )}
+                    >
+                      {wt}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            <Field label="Most preferred companies">
+              <SkillTagInput
+                value={watch('preferredCompanies') ?? []}
+                onChange={v => setValue('preferredCompanies', v)}
+                options={[]}
+                placeholder="Type a company name and press Enter…"
+              />
+            </Field>
+
+            {watch('openToRelocation') && (
+              <Field label="Most preferred countries (for relocation)">
+                <SkillTagInput
+                  value={watch('preferredCountries') ?? []}
+                  onChange={v => setValue('preferredCountries', v)}
+                  options={COUNTRIES}
+                  placeholder="Search or type a country…"
+                />
+              </Field>
+            )}
+
+            <Field label="Most preferred benefits">
+              <SkillTagInput
+                value={watch('preferredBenefits') ?? []}
+                onChange={v => setValue('preferredBenefits', v)}
+                options={['HMO', 'Housing Allowance', 'Travel Allowance', 'Equity / Stock Options', 'Relocation Assistance', 'Flexible Hours', 'Remote Work', 'Pension', 'Education / Training Budget', 'Gym / Wellness']}
+                placeholder="Search or type a benefit…"
+              />
             </Field>
           </Section>
 
@@ -1232,7 +1296,7 @@ function EmployerProfileTab() {
   const save = useMutation({
     mutationFn: (data: any) => usersApi.updateEmployerProfile({
       ...data,
-      brandAndVisuals: brandAssets.map(a => a.url),
+      brandVisuals: brandAssets.map(a => a.url),
     }),
     onSuccess: (res) => {
       const u = res.data.data ?? res.data;

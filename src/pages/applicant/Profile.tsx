@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { COUNTRIES, SKILLS, CERTIFICATIONS } from '@/lib/profile-data';
 import type {
   ApplicantProfile, ProfileExperience, ProfileEducation,
-  ProfileSkill, ProfileLanguage, ProfileCertification, ProfileAward, ProfileReference,
+  ProfileSkill, ProfileLanguage, ProfileCertification, ProfileAward, ProfileReference, ProfileSalaryRange,
 } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -40,7 +40,7 @@ const SECTION_NAV = [
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
 const LANG_LEVELS  = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Native'];
 const JOB_TYPES    = ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'FREELANCE'];
-const SALARY_FREQS = ['yearly', 'monthly', 'weekly', 'hourly'];
+const SALARY_FREQS = ['yearly', 'monthly', 'daily', 'weekly', 'hourly'];
 
 export default function ApplicantProfilePage() {
   const { user } = useAuthStore();
@@ -942,25 +942,43 @@ function SocialLinksForm({ profile, onSave, saving }: { profile: ApplicantProfil
   );
 }
 
+const WORK_TYPES = ['REMOTE', 'ONSITE', 'HYBRID'];
+const COMMON_BENEFITS = ['HMO / Health Insurance', 'Housing Allowance', 'Travel Allowance', 'Equity / Stock Options', 'Relocation Assistance', 'Flexible Hours', 'Remote Work Stipend', 'Learning & Development', 'Parental Leave'];
+
 function PreferencesForm({ profile, onSave, saving }: { profile: ApplicantProfile; onSave: (d: any) => void; saving: boolean }) {
   const [desiredTitles, setDesiredTitles] = useState<string[]>(profile?.desiredJobTitles ?? []);
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(profile?.jobTypes ?? []);
+  const [selectedWorkTypes, setSelectedWorkTypes] = useState<string[]>(profile?.workTypes ?? []);
   const [openToRelocation, setOpenToRelocation] = useState(profile?.openToRelocation ?? false);
+  const [preferredCountries, setPreferredCountries] = useState<string[]>(profile?.preferredCountries ?? []);
+  const [preferredCompanies, setPreferredCompanies] = useState<string[]>(profile?.preferredCompanies ?? []);
+  const [preferredBenefits, setPreferredBenefits] = useState<string[]>(profile?.preferredBenefits ?? []);
+  const [expectedSalaries, setExpectedSalaries] = useState<ProfileSalaryRange[]>(
+    profile?.expectedSalaries?.length ? profile.expectedSalaries : (profile?.salaryRanges ?? [])
+  );
+
   const [newTitle, setNewTitle] = useState('');
-  const [salaryMin, setSalaryMin] = useState(profile?.salaryRanges?.[0]?.minAmount?.toString() ?? '');
-  const [salaryMax, setSalaryMax] = useState(profile?.salaryRanges?.[0]?.maxAmount?.toString() ?? '');
-  const [salaryCurrency, setSalaryCurrency] = useState(profile?.salaryRanges?.[0]?.currency ?? 'USD');
-  const [salaryFreq, setSalaryFreq] = useState<string>(profile?.salaryRanges?.[0]?.frequency ?? 'yearly');
+  const [newCountry, setNewCountry] = useState('');
+  const [newCompany, setNewCompany] = useState('');
+  const [newBenefit, setNewBenefit] = useState('');
+
+  // Salary draft
+  const [salCurrency, setSalCurrency] = useState('USD');
+  const [salMin, setSalMin] = useState('');
+  const [salMax, setSalMax] = useState('');
+  const [salFreq, setSalFreq] = useState<string>('yearly');
+  const [showAddSalary, setShowAddSalary] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setDesiredTitles(profile.desiredJobTitles ?? []);
       setSelectedJobTypes(profile.jobTypes ?? []);
+      setSelectedWorkTypes(profile.workTypes ?? []);
       setOpenToRelocation(profile.openToRelocation ?? false);
-      setSalaryMin(profile.salaryRanges?.[0]?.minAmount?.toString() ?? '');
-      setSalaryMax(profile.salaryRanges?.[0]?.maxAmount?.toString() ?? '');
-      setSalaryCurrency(profile.salaryRanges?.[0]?.currency ?? 'USD');
-      setSalaryFreq(profile.salaryRanges?.[0]?.frequency ?? 'yearly');
+      setPreferredCountries(profile.preferredCountries ?? []);
+      setPreferredCompanies(profile.preferredCompanies ?? []);
+      setPreferredBenefits(profile.preferredBenefits ?? []);
+      setExpectedSalaries(profile.expectedSalaries?.length ? profile.expectedSalaries : (profile.salaryRanges ?? []));
     }
   }, [profile]);
 
@@ -969,77 +987,302 @@ function PreferencesForm({ profile, onSave, saving }: { profile: ApplicantProfil
     setDesiredTitles(prev => [...prev, newTitle.trim()]);
     setNewTitle('');
   };
+
+  const addCountry = () => {
+    if (!newCountry.trim() || preferredCountries.includes(newCountry.trim())) return;
+    setPreferredCountries(prev => [...prev, newCountry.trim()]);
+    setNewCountry('');
+  };
+
+  const addCompany = () => {
+    if (!newCompany.trim() || preferredCompanies.includes(newCompany.trim())) return;
+    setPreferredCompanies(prev => [...prev, newCompany.trim()]);
+    setNewCompany('');
+  };
+
+  const toggleBenefit = (b: string) => {
+    setPreferredBenefits(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
+  };
+
+  const addCustomBenefit = () => {
+    if (!newBenefit.trim() || preferredBenefits.includes(newBenefit.trim())) return;
+    setPreferredBenefits(prev => [...prev, newBenefit.trim()]);
+    setNewBenefit('');
+  };
+
+  const addSalaryRange = () => {
+    if (!salMin && !salMax) return;
+    const cleanCurr = salCurrency.toUpperCase().trim() || 'USD';
+    const cleanFreq = salFreq.toLowerCase().trim();
+    const duplicate = expectedSalaries.find(
+      s => (s.currency || '').toUpperCase() === cleanCurr && (s.frequency || '').toLowerCase() === cleanFreq
+    );
+    if (duplicate) {
+      toast.error(`An expected salary for ${cleanCurr} (${cleanFreq}) already exists. Duplicate frequency for the same currency is not allowed.`);
+      return;
+    }
+    const item: ProfileSalaryRange = {
+      currency: cleanCurr,
+      minAmount: Number(salMin) || 0,
+      maxAmount: Number(salMax) || 0,
+      frequency: cleanFreq as any,
+    };
+    setExpectedSalaries(prev => [...prev, item]);
+    setSalMin('');
+    setSalMax('');
+    setShowAddSalary(false);
+  };
+
+  const removeSalaryRange = (idx: number) => {
+    setExpectedSalaries(prev => prev.filter((_, i) => i !== idx));
+  };
+
   const toggleJobType = (t: string) =>
     setSelectedJobTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+
+  const toggleWorkType = (t: string) =>
+    setSelectedWorkTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
 
   const handleSave = () => {
     onSave({
       desiredJobTitles: desiredTitles,
       jobTypes: selectedJobTypes,
+      workTypes: selectedWorkTypes,
       openToRelocation,
-      salaryRanges: salaryMin || salaryMax ? [{
-        currency: salaryCurrency,
-        minAmount: Number(salaryMin) || 0,
-        maxAmount: Number(salaryMax) || 0,
-        frequency: salaryFreq as any,
-      }] : [],
+      preferredCountries: openToRelocation ? preferredCountries : [],
+      preferredCompanies,
+      preferredBenefits,
+      expectedSalaries,
+      salaryRanges: expectedSalaries,
     });
   };
 
   return (
     <>
-      <div className="space-y-5">
-        {/* Job types */}
+      <div className="space-y-6">
+
+        {/* Work Types (Remote, Onsite, Hybrid) */}
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Job Types</p>
+          <p className="text-xs font-semibold text-foreground">Preferred Work Types</p>
+          <div className="flex flex-wrap gap-2">
+            {WORK_TYPES.map(w => (
+              <button
+                type="button"
+                key={w}
+                onClick={() => toggleWorkType(w)}
+                className={cn(
+                  'px-3.5 py-1.5 text-xs font-medium rounded-full border transition-all',
+                  selectedWorkTypes.includes(w)
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'border-border bg-surface-raised text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Job Types */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-foreground">Employment Types</p>
           <div className="flex flex-wrap gap-2">
             {JOB_TYPES.map(t => (
-              <button key={t} onClick={() => toggleJobType(t)}
-                className={cn('px-3 py-1 text-xs rounded-full border transition-colors',
-                  selectedJobTypes.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground')}>
+              <button
+                type="button"
+                key={t}
+                onClick={() => toggleJobType(t)}
+                className={cn(
+                  'px-3 py-1 text-xs rounded-full border transition-colors',
+                  selectedJobTypes.includes(t)
+                    ? 'bg-surface-raised border-primary text-primary font-medium'
+                    : 'border-border text-muted-foreground hover:text-foreground'
+                )}
+              >
                 {t.replace(/_/g, ' ')}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Desired titles */}
+        {/* Desired Titles */}
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Desired Job Titles</p>
+          <p className="text-xs font-semibold text-foreground">Desired Job Titles</p>
           <div className="flex flex-wrap gap-2 mb-2">
             {desiredTitles.map((t, i) => (
-              <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-raised text-foreground text-xs rounded-full border border-border">
+              <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-raised text-foreground text-xs rounded-full border border-border">
                 {t}
-                <button onClick={() => setDesiredTitles(prev => prev.filter((_, j) => j !== i))}><Trash2 className="h-2.5 w-2.5" /></button>
+                <button type="button" onClick={() => setDesiredTitles(prev => prev.filter((_, j) => j !== i))}><Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" /></button>
               </span>
             ))}
           </div>
           <div className="flex gap-2">
-            <Input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Frontend Engineer" className="h-8 text-sm"
-              onKeyDown={e => e.key === 'Enter' && addTitle()} />
-            <Button size="sm" variant="outline" onClick={addTitle} className="h-8"><Plus className="h-3.5 w-3.5" /></Button>
+            <Input
+              value={newTitle}
+              onChange={e => setNewTitle(e.target.value)}
+              placeholder="e.g. Senior Fullstack Engineer"
+              className="h-8 text-sm"
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTitle(); } }}
+            />
+            <Button size="sm" variant="outline" onClick={addTitle} className="h-8"><Plus className="h-3.5 w-3.5 mr-1" /> Add</Button>
           </div>
         </div>
 
-        {/* Salary */}
+        {/* Relocation & Most Preferred Countries */}
+        <div className="space-y-3 rounded-xl border border-border bg-surface-raised/40 p-4">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={openToRelocation}
+              onChange={e => setOpenToRelocation(e.target.checked)}
+              className="rounded border-border accent-primary h-4 w-4"
+            />
+            <div>
+              <span className="text-xs font-bold text-foreground block">Open to Relocation</span>
+              <span className="text-[11px] text-muted-foreground block">Check if you are willing to relocate for the right job opportunity</span>
+            </div>
+          </label>
+
+          {openToRelocation && (
+            <div className="pt-2 border-t border-border/50 space-y-2">
+              <p className="text-xs font-medium text-foreground">Most Preferred Countries for Relocation</p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {preferredCountries.map((c, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary border border-primary/20 text-xs rounded-full font-medium">
+                    {c}
+                    <button type="button" onClick={() => setPreferredCountries(prev => prev.filter((_, j) => j !== i))}><Trash2 className="h-3 w-3 text-primary/70 hover:text-primary" /></button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={newCountry}
+                  onChange={e => setNewCountry(e.target.value)}
+                  placeholder="e.g. Canada, Germany, United Kingdom"
+                  className="h-8 text-sm"
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCountry(); } }}
+                />
+                <Button size="sm" variant="outline" onClick={addCountry} className="h-8"><Plus className="h-3.5 w-3.5 mr-1" /> Add</Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Most Preferred Companies */}
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Expected Salary</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <Input value={salaryMin} onChange={e => setSalaryMin(e.target.value)} placeholder="Min" className="h-8 text-sm" type="number" />
-            <Input value={salaryMax} onChange={e => setSalaryMax(e.target.value)} placeholder="Max" className="h-8 text-sm" type="number" />
-            <Input value={salaryCurrency} onChange={e => setSalaryCurrency(e.target.value)} placeholder="USD" className="h-8 text-sm" />
-            <select value={salaryFreq} onChange={e => setSalaryFreq(e.target.value)}
-              className="h-8 text-xs bg-surface-raised border border-border rounded-md px-2 text-foreground">
-              {SALARY_FREQS.map(f => <option key={f} value={f}>{f}</option>)}
-            </select>
+          <p className="text-xs font-semibold text-foreground">Most Preferred Companies</p>
+          <p className="text-[11px] text-muted-foreground">List top companies you dream or prefer to work with</p>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {preferredCompanies.map((c, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-raised text-foreground text-xs rounded-full border border-border font-medium">
+                {c}
+                <button type="button" onClick={() => setPreferredCompanies(prev => prev.filter((_, j) => j !== i))}><Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" /></button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newCompany}
+              onChange={e => setNewCompany(e.target.value)}
+              placeholder="e.g. Google, Stripe, Microsoft"
+              className="h-8 text-sm"
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCompany(); } }}
+            />
+            <Button size="sm" variant="outline" onClick={addCompany} className="h-8"><Plus className="h-3.5 w-3.5 mr-1" /> Add</Button>
           </div>
         </div>
 
-        {/* Relocation */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={openToRelocation} onChange={e => setOpenToRelocation(e.target.checked)} className="rounded border-border" />
-          <span className="text-xs text-foreground">Open to relocation</span>
-        </label>
+        {/* Expected Salary (Multiple currencies supported) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-foreground">Expected Salary (Multiple Currencies)</p>
+              <p className="text-[11px] text-muted-foreground">Add your expected salary for each currency option</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => setShowAddSalary(!showAddSalary)} className="h-7 text-xs">
+              <Plus className="h-3 w-3 mr-1" /> Add Currency Range
+            </Button>
+          </div>
+
+          {/* List of defined salaries */}
+          {expectedSalaries.length > 0 && (
+            <div className="space-y-2">
+              {expectedSalaries.map((s, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-surface-raised/60 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">{s.currency}</span>
+                    <span className="font-semibold text-foreground">
+                      {s.minAmount ? s.minAmount.toLocaleString() : '0'} – {s.maxAmount ? s.maxAmount.toLocaleString() : 'Any'}
+                    </span>
+                    <span className="text-muted-foreground">/ {s.frequency}</span>
+                  </div>
+                  <button type="button" onClick={() => removeSalaryRange(idx)} className="text-muted-foreground hover:text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add salary inline card */}
+          {showAddSalary && (
+            <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 space-y-3">
+              <p className="text-xs font-semibold text-foreground">Add Expected Salary</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <Input value={salMin} onChange={e => setSalMin(e.target.value)} placeholder="Min Amount" className="h-8 text-xs bg-surface" type="number" />
+                <Input value={salMax} onChange={e => setSalMax(e.target.value)} placeholder="Max Amount" className="h-8 text-xs bg-surface" type="number" />
+                <Input value={salCurrency} onChange={e => setSalCurrency(e.target.value.toUpperCase())} placeholder="Currency (USD, NGN, GBP)" className="h-8 text-xs bg-surface" />
+                <select
+                  value={salFreq}
+                  onChange={e => setSalFreq(e.target.value)}
+                  className="h-8 text-xs bg-surface border border-border rounded-md px-2 text-foreground font-medium"
+                >
+                  {SALARY_FREQS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setShowAddSalary(false)} className="h-7 text-xs">Cancel</Button>
+                <Button size="sm" onClick={addSalaryRange} className="h-7 text-xs">Save Currency Range</Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Most Preferred Benefits */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-foreground">Most Preferred Benefits</p>
+          <p className="text-[11px] text-muted-foreground">Select or type benefits that matter most to you</p>
+          
+          <div className="flex flex-wrap gap-2">
+            {COMMON_BENEFITS.map(b => (
+              <button
+                type="button"
+                key={b}
+                onClick={() => toggleBenefit(b)}
+                className={cn(
+                  'px-3 py-1 text-xs rounded-full border transition-all',
+                  preferredBenefits.includes(b)
+                    ? 'bg-primary text-primary-foreground border-primary font-medium'
+                    : 'border-border bg-surface-raised text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <Input
+              value={newBenefit}
+              onChange={e => setNewBenefit(e.target.value)}
+              placeholder="Custom benefit e.g. Annual Gym Membership"
+              className="h-8 text-sm"
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomBenefit(); } }}
+            />
+            <Button size="sm" variant="outline" onClick={addCustomBenefit} className="h-8"><Plus className="h-3.5 w-3.5 mr-1" /> Add Custom</Button>
+          </div>
+        </div>
+
       </div>
       <SaveBar onSave={handleSave} saving={saving} />
     </>

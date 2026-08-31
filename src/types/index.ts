@@ -117,7 +117,7 @@ export interface ProfileSalaryRange {
   currency: string;
   minAmount: number;
   maxAmount: number;
-  frequency: 'yearly' | 'monthly' | 'weekly' | 'hourly';
+  frequency: 'yearly' | 'monthly' | 'daily' | 'weekly' | 'hourly';
 }
 
 export interface ProfileLocation {
@@ -154,8 +154,13 @@ export interface ApplicantProfile extends AuthUser {
   // Career preferences
   desiredJobTitles?: string[];
   jobTypes?: string[];
+  workTypes?: string[];
   preferredLocations?: ProfileLocation[];
+  preferredCountries?: string[];
+  preferredCompanies?: string[];
+  preferredBenefits?: string[];
   salaryRanges?: ProfileSalaryRange[];
+  expectedSalaries?: ProfileSalaryRange[];
   openToRelocation?: boolean;
   // Profile sections
   education?: ProfileEducation[];
@@ -202,7 +207,7 @@ export interface SalaryRange {
   min: number;
   max: number;
   currency: string;
-  frequency: 'yearly' | 'monthly' | 'weekly' | 'hourly';
+  frequency: 'yearly' | 'monthly' | 'daily' | 'weekly' | 'hourly';
 }
 
 export interface ScreeningQuestion {
@@ -245,6 +250,10 @@ export interface Job {
   experienceYears?: number;
   skillSet?: string[];
   preferredCandidateCountry?: string[];
+  preferredCandidatePreviousCompany?: string[];
+  preferredCandidateUniversity?: string[];
+  preferredCandidateQualification?: string[];
+  preferredCandidateGrade?: string[];
   hiringManager?: string;
   screeningQuestions?: ScreeningQuestion[];
   aiSettings?: AiSettings;

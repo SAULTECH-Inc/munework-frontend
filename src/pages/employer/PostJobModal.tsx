@@ -86,6 +86,28 @@ const SKILL_OPTIONS: SelectOption[] = SKILLS.map(s => ({ label: s, value: s }));
 const COUNTRY_OPTIONS: SelectOption[] = COUNTRIES.map(c => ({ label: c, value: c }));
 const DEPT_OPTIONS: SelectOption[] = DEPARTMENTS.map(d => ({ label: d, value: d }));
 
+const QUALIFICATION_OPTIONS: SelectOption[] = [
+  { label: 'BSc (Bachelor of Science)', value: 'BSC' },
+  { label: 'BEng (Bachelor of Engineering)', value: 'BENG' },
+  { label: 'BA (Bachelor of Arts)', value: 'BA' },
+  { label: 'MSc (Master of Science)', value: 'MSC' },
+  { label: 'PhD (Doctor of Philosophy)', value: 'PHD' },
+  { label: 'HND (Higher National Diploma)', value: 'HND' },
+  { label: 'OND (Ordinary National Diploma)', value: 'OND' },
+  { label: 'MBA (Master of Business Administration)', value: 'MBA' },
+  { label: 'LL.B (Bachelor of Laws)', value: 'LLB' },
+];
+
+const GRADE_OPTIONS: SelectOption[] = [
+  { label: 'First Class Honors (1st Class)', value: 'First Class' },
+  { label: 'Second Class Upper (2.1)', value: '2.1' },
+  { label: 'Second Class Lower (2.2)', value: '2.2' },
+  { label: 'Third Class (3rd Class)', value: 'Third Class' },
+  { label: 'Distinction', value: 'Distinction' },
+  { label: 'Merit', value: 'Merit' },
+  { label: 'Pass', value: 'Pass' },
+];
+
 const STEPS = [
   { id: 1, label: 'Content', icon: FileText },
   { id: 2, label: 'Details', icon: SlidersHorizontal },
@@ -145,6 +167,9 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
   const [skillItems, setSkillItems] = useState<SelectOption[]>([]);
   const [criticalSkills, setCriticalSkills] = useState<SelectOption[]>([]);
   const [preferredCountries, setPreferredCountries] = useState<SelectOption[]>([]);
+  const [preferredUniversities, setPreferredUniversities] = useState<SelectOption[]>([]);
+  const [preferredQualifications, setPreferredQualifications] = useState<SelectOption[]>([]);
+  const [preferredGrades, setPreferredGrades] = useState<SelectOption[]>([]);
   const [appMethods, setAppMethods] = useState<AppMethods>(DEFAULT_APP_METHODS);
   const [screeningQuestions, setScreeningQuestions] = useState<ScreeningQuestion[]>([]);
   const [stepError, setStepError] = useState('');
@@ -205,6 +230,9 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
       setSkillItems((editJob.skillSet ?? (editJob as any).skills ?? []).map((s: string) => ({ label: s, value: s })));
       setCriticalSkills((editJob.aiSettings as any)?.criticalSkills?.map((s: string) => ({ label: s, value: s })) ?? []);
       setPreferredCountries((editJob as any).preferredCandidateCountry?.map((c: string) => ({ label: c, value: c })) ?? []);
+      setPreferredUniversities((editJob as any).preferredCandidateUniversity?.map((u: string) => ({ label: u, value: u })) ?? []);
+      setPreferredQualifications((editJob as any).preferredCandidateQualification?.map((q: string) => ({ label: q, value: q })) ?? []);
+      setPreferredGrades((editJob as any).preferredCandidateGrade?.map((g: string) => ({ label: g, value: g })) ?? []);
       setAppMethods((editJob as any).applicationMethod ?? DEFAULT_APP_METHODS);
       setScreeningQuestions(editJob.screeningQuestions?.map((q: any) => ({
         id: q.id ?? Date.now().toString(),
@@ -227,6 +255,9 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
       setSkillItems([]);
       setCriticalSkills([]);
       setPreferredCountries([]);
+      setPreferredUniversities([]);
+      setPreferredQualifications([]);
+      setPreferredGrades([]);
       setAppMethods(DEFAULT_APP_METHODS);
       setScreeningQuestions([]);
       setStepError('');
@@ -358,6 +389,9 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
         priority: data.priority,
         skills: skillItems.map(s => s.value),
         preferredCandidateCountry: preferredCountries.map(c => c.value),
+        preferredCandidateUniversity: preferredUniversities.map(u => u.value),
+        preferredCandidateQualification: preferredQualifications.map(q => q.value),
+        preferredCandidateGrade: preferredGrades.map(g => g.value),
         applicationMethod: appMethods,
         salaryRange: salaryMode !== 'hidden' ? {
           min: salaryMode === 'exact' ? (data.salaryMax ?? 0) : (data.salaryMin ?? 0),
@@ -754,12 +788,39 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
                   </div>
                 </div>
 
-                <Field label="Preferred candidate countries (optional)">
+                <Field label="Most preferred candidate countries (optional)">
                   <MultiSelect
                     options={COUNTRY_OPTIONS}
                     selected={preferredCountries}
                     onChange={setPreferredCountries}
-                    placeholder="Search and add countries…"
+                    placeholder="Search and add preferred countries…"
+                  />
+                </Field>
+
+                <Field label="Most preferred universities / institutions (optional)">
+                  <MultiSelect
+                    options={[]}
+                    selected={preferredUniversities}
+                    onChange={setPreferredUniversities}
+                    placeholder="Type or add target universities (e.g. Oxford, MIT, Covenant, Unilag)…"
+                  />
+                </Field>
+
+                <Field label="Most preferred academic qualifications (optional)">
+                  <MultiSelect
+                    options={QUALIFICATION_OPTIONS}
+                    selected={preferredQualifications}
+                    onChange={setPreferredQualifications}
+                    placeholder="Select target degrees (e.g. BSC, BENG, BA, MSC, PHD)…"
+                  />
+                </Field>
+
+                <Field label="Most preferred school grade / degree class (optional)">
+                  <MultiSelect
+                    options={GRADE_OPTIONS}
+                    selected={preferredGrades}
+                    onChange={setPreferredGrades}
+                    placeholder="Select minimum/preferred grades (e.g. First Class, 2.1, Distinction)…"
                   />
                 </Field>
               </div>

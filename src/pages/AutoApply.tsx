@@ -37,6 +37,13 @@ interface AutoApplySettings {
   skipAlreadyApplied: boolean;
   blacklistedCompanies: string[];
   blacklistedKeywords: string[];
+  desiredJobTitles: string[];
+  openToRelocation: boolean;
+  preferredCountries: string[];
+  preferredCompanies: string[];
+  expectedSalaries: any[];
+  workTypes: string[];
+  preferredBenefits: string[];
 }
 
 const DEFAULTS: AutoApplySettings = {
@@ -50,6 +57,13 @@ const DEFAULTS: AutoApplySettings = {
   skipAlreadyApplied: true,
   blacklistedCompanies: [],
   blacklistedKeywords: [],
+  desiredJobTitles: [],
+  openToRelocation: false,
+  preferredCountries: [],
+  preferredCompanies: [],
+  expectedSalaries: [],
+  workTypes: [],
+  preferredBenefits: [],
 };
 
 export default function AutoApplyPage() {
@@ -57,6 +71,15 @@ export default function AutoApplyPage() {
   const [settings, setSettings] = useState<AutoApplySettings>(DEFAULTS);
   const [companyInput, setCompanyInput] = useState('');
   const [keywordInput, setKeywordInput] = useState('');
+  const [titleInput, setTitleInput] = useState('');
+  const [prefCompanyInput, setPrefCompanyInput] = useState('');
+  const [prefCountryInput, setPrefCountryInput] = useState('');
+  const [benefitInput, setBenefitInput] = useState('');
+  const [salCurrency, setSalCurrency] = useState('USD');
+  const [salMin, setSalMin] = useState('');
+  const [salMax, setSalMax] = useState('');
+  const [salFreq, setSalFreq] = useState('yearly');
+  const [showSalInput, setShowSalInput] = useState(false);
   const [dirty, setDirty] = useState(false);
 
   const { data: raw, isLoading } = useQuery({
@@ -324,6 +347,308 @@ export default function AutoApplyPage() {
                   </div>
                   <TagList tags={settings.blacklistedKeywords} onRemove={t => removeTag('blacklistedKeywords', t)} />
                 </div>
+              </div>
+            </Card>
+
+            {/* Target Job Preferences */}
+            <Card title="Target Job Preferences" icon={Sliders}>
+              <div className="space-y-6">
+
+                {/* Work Types */}
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">Preferred Work Types</p>
+                  <p className="text-xs text-muted-foreground mb-3">Auto apply will match jobs fitting your preferred work style</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['REMOTE', 'ONSITE', 'HYBRID'].map(wt => {
+                      const active = settings.workTypes.includes(wt);
+                      return (
+                        <button
+                          type="button"
+                          key={wt}
+                          onClick={() => {
+                            const updated = active
+                              ? settings.workTypes.filter(w => w !== wt)
+                              : [...settings.workTypes, wt];
+                            patch('workTypes', updated);
+                          }}
+                          className={cn(
+                            'px-3.5 py-1.5 text-xs font-medium rounded-full border transition-all',
+                            active
+                              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                              : 'border-border bg-surface-raised text-muted-foreground hover:text-foreground'
+                          )}
+                        >
+                          {wt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Desired Titles */}
+                <div className="border-t border-border/40 pt-4">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">Target Job Titles</p>
+                  <p className="text-xs text-muted-foreground mb-3">Specific job titles to target for auto applications</p>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      placeholder="Add job title e.g. Frontend Engineer…"
+                      value={titleInput}
+                      onChange={e => setTitleInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && titleInput.trim()) {
+                          e.preventDefault();
+                          if (!settings.desiredJobTitles.includes(titleInput.trim())) {
+                            patch('desiredJobTitles', [...settings.desiredJobTitles, titleInput.trim()]);
+                          }
+                          setTitleInput('');
+                        }
+                      }}
+                      className="flex-1 h-9 px-3 text-xs bg-surface-raised border border-border/60 rounded-xl text-foreground"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-9 px-4 rounded-xl text-xs"
+                      onClick={() => {
+                        if (titleInput.trim() && !settings.desiredJobTitles.includes(titleInput.trim())) {
+                          patch('desiredJobTitles', [...settings.desiredJobTitles, titleInput.trim()]);
+                        }
+                        setTitleInput('');
+                      }}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                    </Button>
+                  </div>
+                  <TagList tags={settings.desiredJobTitles} onRemove={t => patch('desiredJobTitles', settings.desiredJobTitles.filter(x => x !== t))} />
+                </div>
+
+                {/* Relocation & Preferred Countries */}
+                <div className="border-t border-border/40 pt-4 space-y-3">
+                  <Row
+                    icon={MapPin}
+                    title="Open to Relocation"
+                    subtitle="Allow auto-apply to target opportunities in preferred countries"
+                    control={<Toggle value={settings.openToRelocation} onChange={v => patch('openToRelocation', v)} />}
+                  />
+
+                  {settings.openToRelocation && (
+                    <div className="pl-2 pt-2 border-l-2 border-primary/30 space-y-2">
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Most Preferred Countries</p>
+                      <div className="flex gap-2 mb-3">
+                        <input
+                          placeholder="Add country e.g. Canada, Germany…"
+                          value={prefCountryInput}
+                          onChange={e => setPrefCountryInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && prefCountryInput.trim()) {
+                              e.preventDefault();
+                              if (!settings.preferredCountries.includes(prefCountryInput.trim())) {
+                                patch('preferredCountries', [...settings.preferredCountries, prefCountryInput.trim()]);
+                              }
+                              setPrefCountryInput('');
+                            }
+                          }}
+                          className="flex-1 h-9 px-3 text-xs bg-surface-raised border border-border/60 rounded-xl text-foreground"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-9 px-4 rounded-xl text-xs"
+                          onClick={() => {
+                            if (prefCountryInput.trim() && !settings.preferredCountries.includes(prefCountryInput.trim())) {
+                              patch('preferredCountries', [...settings.preferredCountries, prefCountryInput.trim()]);
+                            }
+                            setPrefCountryInput('');
+                          }}
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                        </Button>
+                      </div>
+                      <TagList tags={settings.preferredCountries} onRemove={t => patch('preferredCountries', settings.preferredCountries.filter(x => x !== t))} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Preferred Companies */}
+                <div className="border-t border-border/40 pt-4">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">Most Preferred Companies</p>
+                  <p className="text-xs text-muted-foreground mb-3">Prioritize applications for these target companies</p>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      placeholder="Add company name…"
+                      value={prefCompanyInput}
+                      onChange={e => setPrefCompanyInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && prefCompanyInput.trim()) {
+                          e.preventDefault();
+                          if (!settings.preferredCompanies.includes(prefCompanyInput.trim())) {
+                            patch('preferredCompanies', [...settings.preferredCompanies, prefCompanyInput.trim()]);
+                          }
+                          setPrefCompanyInput('');
+                        }
+                      }}
+                      className="flex-1 h-9 px-3 text-xs bg-surface-raised border border-border/60 rounded-xl text-foreground"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-9 px-4 rounded-xl text-xs"
+                      onClick={() => {
+                        if (prefCompanyInput.trim() && !settings.preferredCompanies.includes(prefCompanyInput.trim())) {
+                          patch('preferredCompanies', [...settings.preferredCompanies, prefCompanyInput.trim()]);
+                        }
+                        setPrefCompanyInput('');
+                      }}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                    </Button>
+                  </div>
+                  <TagList tags={settings.preferredCompanies} onRemove={t => patch('preferredCompanies', settings.preferredCompanies.filter(x => x !== t))} />
+                </div>
+
+                {/* Multi-Currency Expected Salary */}
+                <div className="border-t border-border/40 pt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Expected Salary (Multi-Currency)</p>
+                      <p className="text-xs text-muted-foreground">Salary thresholds per currency for matching jobs</p>
+                    </div>
+                    <Button type="button" size="sm" variant="outline" className="h-7 text-xs" onClick={() => setShowSalInput(!showSalInput)}>
+                      <Plus className="h-3 w-3 mr-1" /> Add Range
+                    </Button>
+                  </div>
+
+                  {settings.expectedSalaries.length > 0 && (
+                    <div className="space-y-2">
+                      {settings.expectedSalaries.map((s: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between p-2 rounded-xl border border-border bg-surface-raised/60 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">{s.currency}</span>
+                            <span className="font-semibold text-foreground">
+                              {s.minAmount ? Number(s.minAmount).toLocaleString() : '0'} – {s.maxAmount ? Number(s.maxAmount).toLocaleString() : 'Any'}
+                            </span>
+                            <span className="text-muted-foreground">/ {s.frequency ?? 'yearly'}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => patch('expectedSalaries', settings.expectedSalaries.filter((_: any, i: number) => i !== idx))}
+                            className="text-muted-foreground hover:text-destructive p-1"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {showSalInput && (
+                    <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 space-y-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <input
+                          type="number"
+                          placeholder="Min Amount"
+                          value={salMin}
+                          onChange={e => setSalMin(e.target.value)}
+                          className="h-8 text-xs px-2 bg-surface border border-border/60 rounded-lg text-foreground"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max Amount"
+                          value={salMax}
+                          onChange={e => setSalMax(e.target.value)}
+                          className="h-8 text-xs px-2 bg-surface border border-border/60 rounded-lg text-foreground"
+                        />
+                        <input
+                          placeholder="Currency (USD, NGN)"
+                          value={salCurrency}
+                          onChange={e => setSalCurrency(e.target.value.toUpperCase())}
+                          className="h-8 text-xs px-2 bg-surface border border-border/60 rounded-lg text-foreground"
+                        />
+                        <select
+                          value={salFreq}
+                          onChange={e => setSalFreq(e.target.value)}
+                          className="h-8 text-xs px-2 bg-surface border border-border/60 rounded-lg text-foreground"
+                        >
+                          <option value="yearly">yearly</option>
+                          <option value="monthly">monthly</option>
+                          <option value="daily">daily</option>
+                          <option value="weekly">weekly</option>
+                          <option value="hourly">hourly</option>
+                        </select>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button type="button" size="sm" variant="ghost" onClick={() => setShowSalInput(false)} className="h-7 text-xs">Cancel</Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            if (!salMin && !salMax) return;
+                            const cleanCurr = salCurrency.toUpperCase().trim() || 'USD';
+                            const cleanFreq = salFreq.toLowerCase().trim();
+                            const duplicate = settings.expectedSalaries.find(
+                              (s: any) => (s.currency || '').toUpperCase() === cleanCurr && (s.frequency || '').toLowerCase() === cleanFreq
+                            );
+                            if (duplicate) {
+                              toast.error(`An expected salary for ${cleanCurr} (${cleanFreq}) already exists. Choose a different frequency.`);
+                              return;
+                            }
+                            const item = {
+                              currency: cleanCurr,
+                              minAmount: Number(salMin) || 0,
+                              maxAmount: Number(salMax) || 0,
+                              frequency: cleanFreq,
+                            };
+                            patch('expectedSalaries', [...settings.expectedSalaries, item]);
+                            setSalMin('');
+                            setSalMax('');
+                            setShowSalInput(false);
+                          }}
+                          className="h-7 text-xs"
+                        >
+                          Add Currency
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Preferred Benefits */}
+                <div className="border-t border-border/40 pt-4">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">Most Preferred Benefits</p>
+                  <p className="text-xs text-muted-foreground mb-3">Key benefits you expect or prefer (HMO, Housing, Travel, Equity)</p>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      placeholder="Add benefit e.g. HMO, Housing, Travel…"
+                      value={benefitInput}
+                      onChange={e => setBenefitInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && benefitInput.trim()) {
+                          e.preventDefault();
+                          if (!settings.preferredBenefits.includes(benefitInput.trim())) {
+                            patch('preferredBenefits', [...settings.preferredBenefits, benefitInput.trim()]);
+                          }
+                          setBenefitInput('');
+                        }
+                      }}
+                      className="flex-1 h-9 px-3 text-xs bg-surface-raised border border-border/60 rounded-xl text-foreground"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-9 px-4 rounded-xl text-xs"
+                      onClick={() => {
+                        if (benefitInput.trim() && !settings.preferredBenefits.includes(benefitInput.trim())) {
+                          patch('preferredBenefits', [...settings.preferredBenefits, benefitInput.trim()]);
+                        }
+                        setBenefitInput('');
+                      }}
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                    </Button>
+                  </div>
+                  <TagList tags={settings.preferredBenefits} onRemove={t => patch('preferredBenefits', settings.preferredBenefits.filter(x => x !== t))} />
+                </div>
+
               </div>
             </Card>
 
