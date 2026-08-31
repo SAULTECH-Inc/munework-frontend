@@ -82,6 +82,16 @@ export async function initFirebaseMessaging() {
       console.log('[FCM] No registration token available. Request permission to generate one.');
     }
 
+    // Clicking a notification focuses this tab and hands us the destination,
+    // because the worker cannot navigate a client it does not control.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'NOTIFICATION_CLICK' && event.data.url) {
+          window.location.assign(event.data.url);
+        }
+      });
+    }
+
     // Listen for foreground messages
     onMessage(messaging, (payload) => {
       console.log('[FCM] Foreground notification received:', payload);

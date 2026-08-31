@@ -53,17 +53,31 @@ if (!firebaseConfig.apiKey || !firebaseConfig.appId) {
 // and focus an existing tab rather than piling up new ones.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = event.notification.data?.url || '/notifications';
+  const target = new URL(
+    event.notification.data?.url || '/notifications',
+    self.location.origin,
+  ).href;
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    (async () => {
+      const clients = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      });
+
       for (const client of clients) {
-        if ('focus' in client) {
-          client.navigate(target);
-          return client.focus();
-        }
+        if (new URL(client.url).origin !== self.location.origin) continue;
+
+        // Not client.navigate(): that throws unless this worker controls the
+        // client, and it does not — the app runs under sw.js at scope "/",
+        // while this worker sits on its own scope. Focus the tab and let the
+        // page route itself.
+        await client.focus();
+        client.postMessage({ type: 'NOTIFICATION_CLICK', url: target });
+        return;
       }
-      return self.clients.openWindow(target);
-    }),
+
+      await self.clients.openWindow(target);
+    })(),
   );
 });
