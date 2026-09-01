@@ -1,11 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Mune Work">
+  <!--
+    The mark is five rising bars whose tops trace an M: tall, dipping through
+    the middle, rising higher on the right. It reads as a growth chart and as
+    the letter at the same time.
+
+    Drawn as rects rather than as text so it rasterizes identically everywhere.
+    The previous mark set the "M" in Outfit, so any platform without that font
+    substituted a different letterform — and Google's OAuth branding review
+    rejected a plain letter tile as not uniquely identifying the brand.
+  -->
   <defs>
     <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="hsl(262 83% 58%)" />
       <stop offset="100%" stop-color="hsl(285 86% 57%)" />
     </linearGradient>
   </defs>
+
   <rect width="64" height="64" rx="16" fill="url(#brand)" />
-  <text x="32" y="33" fill="#fff" font-family="Outfit, ui-sans-serif, system-ui, sans-serif"
-        font-size="34" font-weight="700" text-anchor="middle" dominant-baseline="central">M</text>
+
+  <!-- Outer bars are wider and tallest so they read as the M's stems; the
+       inner three dip sharply to carve the V between them. -->
+  <g fill="#fff">
+    <rect x="11"   y="15" width="8" height="38" rx="4" />
+    <rect x="22"   y="31" width="5" height="22" rx="2.5" />
+    <rect x="29.5" y="39" width="5" height="14" rx="2.5" />
+    <rect x="37"   y="26" width="5" height="27" rx="2.5" />
+    <rect x="45"   y="11" width="8" height="42" rx="4" />
+  </g>
 </svg>

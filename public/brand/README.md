@@ -1,12 +1,18 @@
 # Mune Work brand assets
 
 Generated from the mark in `public/icon.svg` — purple gradient tile
-(`#7C3AED` → `#C033F0`, 135°) with a white Outfit "M".
+(`#7C3AED` → `#C033F0`, 135°) holding five white rising bars whose tops trace
+an M. The outer two are wider and tallest so they read as the letter's stems;
+the inner three dip to carve the V between them.
 
-The source SVG sets the "M" as live text, so anything that rasterizes it
-without the Outfit webfont substitutes a different typeface and the logo
-changes shape. These PNGs have the real font baked in — **upload these, not
-the SVG**, to any third party.
+The mark replaced a plain Outfit "M" for two reasons. Google's OAuth branding
+review rejected the letter tile as not uniquely identifying the brand, and
+setting the glyph as live text meant any platform lacking Outfit substituted a
+different letterform. The bars are vector rects, so they rasterize identically
+everywhere.
+
+The wordmark exports still use Outfit for the "Mune Work" text, so **upload
+these PNGs, not the SVG**, to any third party.
 
 ## Which file goes where
 
@@ -32,12 +38,12 @@ standard rounded tile would lose its corners.
 ## Regenerating
 
 ```
-node /tmp/brandgen.js <output-dir>
+node scripts/brandgen.cjs public/brand
 ```
 
-Renders through headless Chrome so the Outfit webfont loads. Each size is
-rendered at its true pixel dimensions rather than downscaled from one large
-export, which keeps the small favicons legible.
+Drives Chrome's headless `--screenshot` so the Outfit webfont loads for the
+wordmarks. Each size is rendered at its true pixel dimensions rather than
+downscaled from one large export, which keeps the small favicons legible.
 
 ## Colours
 
