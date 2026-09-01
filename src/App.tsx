@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
 import { AppLayout } from '@/layouts/AppLayout';
+import { PublicProfileLayout } from '@/layouts/PublicProfileLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
 
 import LandingPage from '@/pages/Landing';
@@ -91,6 +92,12 @@ export default function App() {
           {/* OAuth redirect target — no layout, handles its own redirect */}
           <Route path="/auth/social/:action/callback" element={<OAuthCallback />} />
 
+          {/* Shareable profiles: readable without a session, full chrome with one */}
+          <Route element={<PublicProfileLayout />}>
+            <Route path="/profile/applicant/:id" element={<ApplicantPublicProfilePage />} />
+            <Route path="/profile/employer/:id" element={<EmployerPublicProfilePage />} />
+          </Route>
+
           {/* Authenticated shell */}
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<SmartDashboard />} />
@@ -110,8 +117,6 @@ export default function App() {
             <Route path="/network" element={<NetworkPage />} />
             <Route path="/auto-apply" element={<AutoApplyPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/profile/applicant/:id" element={<ApplicantPublicProfilePage />} />
-            <Route path="/profile/employer/:id" element={<EmployerPublicProfilePage />} />
             <Route path="/assessments" element={<SmartAssessments />} />
             <Route path="/employer/assessments" element={<EmployerAssessmentsPage />} />
             <Route path="/plans" element={<PlansPage />} />

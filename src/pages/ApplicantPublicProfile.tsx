@@ -2,22 +2,25 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
-  MapPin, Mail, Phone, Globe, Linkedin, Twitter,
+  MapPin, Mail, Phone, Linkedin, Twitter,
   Briefcase, GraduationCap, Award, Languages, Star,
   Calendar, ArrowLeft, MessageSquare, Github, Instagram,
   Facebook, Youtube, Link2, ChevronDown, ChevronUp,
+  Share2, Check, UserSearch,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersApi, chatApi } from '@/lib/api';
+import { useAuthStore } from '@/store/auth.store';
 import { cn, getInitials } from '@/lib/utils';
 import type { ApplicantProfile } from '@/types';
 
 export default function ApplicantPublicProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
 
   const { data: raw, isLoading, isError } = useQuery({
     queryKey: ['public-applicant', id],
@@ -28,6 +31,7 @@ export default function ApplicantPublicProfilePage() {
   const profile = raw as ApplicantProfile | undefined;
 
   const [showAllExp, setShowAllExp] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const startChat = useMutation({
     mutationFn: () => chatApi.startDirect(id!),
@@ -37,15 +41,27 @@ export default function ApplicantPublicProfilePage() {
     },
   });
 
+  const share = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   if (isLoading) return <ProfileSkeleton />;
 
   if (isError || !profile) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
-        <p className="text-sm text-muted-foreground">Profile not found or not public.</p>
-        <Link to="/" className="text-xs text-primary hover:underline flex items-center gap-1">
-          <ArrowLeft className="h-3 w-3" /> Go back
-        </Link>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-3 px-6">
+        <div className="h-12 w-12 rounded-2xl bg-surface-raised border border-border flex items-center justify-center">
+          <UserSearch className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <p className="text-base font-semibold text-foreground">Profile not available</p>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          This profile doesn’t exist, or the person has made it private.
+        </p>
+        <Button asChild variant="outline" size="sm" className="mt-2">
+          <Link to="/jobs">Browse jobs</Link>
+        </Button>
       </div>
     );
   }
@@ -54,34 +70,62 @@ export default function ApplicantPublicProfilePage() {
   const location = [profile.city, profile.state, profile.country].filter(Boolean).join(', ');
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6 pb-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-5 pb-16">
 
-      {/* Back */}
-      <Link to={-1 as any} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-        <ArrowLeft className="h-3.5 w-3.5" /> Back
-      </Link>
+      {/* Only offer "back" when there is somewhere to go back to — arriving
+          from a shared link leaves no history to pop. */}
+      {window.history.length > 1 && (
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
+        </button>
+      )}
 
       {/* Hero card */}
-      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-        <div className="h-24 bg-gradient-to-r from-primary/20 to-purple-500/20" />
-        <div className="px-5 pb-5">
-          <div className="flex items-end justify-between -mt-10 mb-4">
-            <Avatar className="h-20 w-20 border-4 border-surface">
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="h-28 sm:h-36 bg-gradient-to-br from-primary via-primary/70 to-purple-500 relative">
+          <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_30%_120%,white,transparent_60%)]" />
+        </div>
+        <div className="px-5 sm:px-7 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-14 sm:-mt-16 mb-5">
+            <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-surface shadow-md">
               <AvatarImage src={profile.profilePicture} />
-              <AvatarFallback className="text-lg">{getInitials(fullName)}</AvatarFallback>
+              <AvatarFallback className="text-2xl">{getInitials(fullName)}</AvatarFallback>
             </Avatar>
-            <Button size="sm" variant="outline" className="gap-1.5 text-xs"
-              onClick={() => startChat.mutate()} disabled={startChat.isPending}>
-              <MessageSquare className="h-3.5 w-3.5" /> Message
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={share}>
+                {copied
+                  ? <><Check className="h-4 w-4 text-success" /> Copied</>
+                  : <><Share2 className="h-4 w-4" /> Share</>}
+              </Button>
+
+              {/* Messaging needs an account, so send anonymous visitors to sign
+                  up rather than firing a request that would only 401. */}
+              {isAuthenticated ? (
+                <Button size="sm" className="gap-1.5"
+                  onClick={() => startChat.mutate()} disabled={startChat.isPending}>
+                  <MessageSquare className="h-4 w-4" />
+                  {startChat.isPending ? 'Opening…' : 'Message'}
+                </Button>
+              ) : (
+                <Button asChild size="sm" className="gap-1.5">
+                  <Link to="/signup">
+                    <MessageSquare className="h-4 w-4" /> Message
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
 
-          <h1 className="text-lg font-bold text-foreground">{fullName}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{fullName}</h1>
           {profile.professionalTitle && (
-            <p className="text-sm text-muted-foreground mt-0.5">{profile.professionalTitle}</p>
+            <p className="text-base text-muted-foreground mt-1">{profile.professionalTitle}</p>
           )}
 
-          <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4">
             {location && <MetaItem icon={MapPin} label={location} />}
             {profile.email && <MetaItem icon={Mail} label={profile.email} />}
             {profile.phoneNumber && <MetaItem icon={Phone} label={profile.phoneNumber} />}
@@ -109,7 +153,7 @@ export default function ApplicantPublicProfilePage() {
           {profile.skills && profile.skills.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-4">
               {profile.skills.slice(0, 12).map((s, i) => (
-                <Badge key={i} variant="outline" className="text-[11px] px-2 py-0.5">{s.skill}</Badge>
+                <Badge key={i} variant="outline" className="text-xs px-2.5 py-0.5">{s.skill}</Badge>
               ))}
               {profile.skills.length > 12 && (
                 <Badge variant="outline" className="text-[11px] px-2 py-0.5 text-muted-foreground">
@@ -124,7 +168,7 @@ export default function ApplicantPublicProfilePage() {
       {/* Summary */}
       {(profile.professionalSummary || profile.bio) && (
         <Card title="About" icon={Star}>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-[15px] text-muted-foreground leading-relaxed">
             {profile.professionalSummary ?? profile.bio}
           </p>
         </Card>
@@ -140,8 +184,8 @@ export default function ApplicantPublicProfilePage() {
                   <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{exp.position}</p>
-                  <p className="text-xs text-muted-foreground">{exp.company}</p>
+                  <p className="text-[15px] font-semibold text-foreground">{exp.position}</p>
+                  <p className="text-sm text-muted-foreground">{exp.company}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {exp.startDate} – {exp.isCurrent ? 'Present' : (exp.endDate ?? '—')}
@@ -177,8 +221,8 @@ export default function ApplicantPublicProfilePage() {
                   <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{edu.institution}</p>
-                  <p className="text-xs text-muted-foreground">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' · ')}</p>
+                  <p className="text-[15px] font-semibold text-foreground">{edu.institution}</p>
+                  <p className="text-sm text-muted-foreground">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' · ')}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {edu.startDate ?? '—'} – {edu.endDate ?? 'Present'}
@@ -201,7 +245,7 @@ export default function ApplicantPublicProfilePage() {
                   <Award className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{cert.certification}</p>
+                  <p className="text-[15px] font-medium text-foreground">{cert.certification}</p>
                   <p className="text-xs text-muted-foreground">
                     {cert.institution}{cert.dateObtained ? ` · ${cert.dateObtained}` : ''}
                   </p>
@@ -279,10 +323,12 @@ export default function ApplicantPublicProfilePage() {
 
 function Card({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 space-y-4">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-primary" />
-        <p className="text-sm font-semibold text-foreground">{title}</p>
+    <div className="bg-surface border border-border rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+      <div className="flex items-center gap-2.5">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <p className="text-base font-semibold text-foreground">{title}</p>
       </div>
       {children}
     </div>
@@ -290,8 +336,8 @@ function Card({ title, icon: Icon, children }: { title: string; icon: React.Elem
 }
 
 function MetaItem({ icon: Icon, label, href }: { icon: React.ElementType; label: string; href?: string }) {
-  const cls = 'flex items-center gap-1 text-xs text-muted-foreground';
-  const inner = <><Icon className="h-3.5 w-3.5 shrink-0" />{label}</>;
+  const cls = 'flex items-center gap-1.5 text-sm text-muted-foreground';
+  const inner = <><Icon className="h-4 w-4 shrink-0" />{label}</>;
   if (href) return <a href={href} target="_blank" rel="noreferrer" className={cn(cls, 'hover:text-primary transition-colors')}>{inner}</a>;
   return <span className={cls}>{inner}</span>;
 }
