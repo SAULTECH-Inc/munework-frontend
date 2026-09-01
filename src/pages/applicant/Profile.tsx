@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usersApi, cvsApi } from '@/lib/api';
 import { cn, getInitials } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
+import { PublicProfileLinks } from '@/components/common/PublicProfileLinks';
 import { COUNTRIES, SKILLS, CERTIFICATIONS } from '@/lib/profile-data';
 import type {
   ApplicantProfile, ProfileExperience, ProfileEducation,
@@ -119,6 +120,10 @@ export default function ApplicantProfilePage() {
               <p className="font-semibold text-sm">{displayName || 'Anonymous User'}</p>
               {profile?.professionalTitle && <p className="text-xs text-muted-foreground mt-0.5">{profile.professionalTitle}</p>}
             </div>
+
+            {/* Nothing else in the app links here, so without this there is no
+                way to see how employers see you, or to share the profile. */}
+            {user?.id && <PublicProfileLinks id={user.id} />}
 
             {completeness?.score != null && (
               <div className="w-full space-y-1.5 pt-1">

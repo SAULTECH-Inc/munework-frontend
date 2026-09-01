@@ -1952,6 +1952,14 @@ interface PrivacySettings {
   onlyEmployers: boolean;
   onlyMyNetwork: boolean;
   onlyMe: boolean;
+  /**
+   * Contact details on the public profile. Separate from the visibility level
+   * above: someone can be happy to be found without publishing their phone
+   * number on a page anyone can open. The API omits these fields unless the
+   * matching flag is true.
+   */
+  showEmail: boolean;
+  showPhone: boolean;
 }
 
 const PRIVACY_OPTIONS: Array<{
@@ -1978,6 +1986,8 @@ const PRIVACY_DEFAULTS: PrivacySettings = {
   onlyEmployers: true,
   onlyMyNetwork: false,
   onlyMe:        false,
+  showEmail:     false,
+  showPhone:     false,
 };
 
 function PrivacyTab() {
@@ -2008,13 +2018,16 @@ function PrivacyTab() {
     },
   });
 
+  // The four visibility levels are mutually exclusive, but the contact flags
+  // are independent — carry them through rather than resetting them.
   const selectOption = (key: keyof PrivacySettings) => {
-    setPrefs({
+    setPrefs(p => ({
+      ...p,
       publicProfile: key === 'publicProfile',
       onlyEmployers: key === 'onlyEmployers',
       onlyMyNetwork: key === 'onlyMyNetwork',
       onlyMe:        key === 'onlyMe',
-    });
+    }));
   };
 
   if (isEmployer) {
@@ -2093,6 +2106,30 @@ function PrivacyTab() {
             </div>
           );
         })}
+      </div>
+
+      {/* Contact details */}
+      <div className="rounded-xl border border-border p-4 space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Contact details</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Your public profile can be opened by anyone with the link, including
+            people who are not signed in. These stay hidden unless you turn them on.
+          </p>
+        </div>
+
+        {([
+          { key: 'showEmail' as const, label: 'Show my email address', value: prefs.showEmail },
+          { key: 'showPhone' as const, label: 'Show my phone number',  value: prefs.showPhone },
+        ]).map(row => (
+          <div key={row.key} className="flex items-center justify-between gap-4">
+            <span className="text-sm text-foreground">{row.label}</span>
+            <Switch
+              checked={row.value}
+              onCheckedChange={(v) => setPrefs(p => ({ ...p, [row.key]: v }))}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Notes */}

@@ -5,6 +5,7 @@ import {
   Loader2, Check, Camera, Link2, Trash2, Plus, FileText,
   Search, X,
 } from 'lucide-react';
+import { PublicProfileLinks } from '@/components/common/PublicProfileLinks';
 import { TopBar } from '@/components/common/TopBar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,6 +88,10 @@ export default function EmployerProfilePage() {
               <p className="text-sm font-semibold text-foreground">{profile?.companyName || 'Company Name'}</p>
               <p className="text-xs text-muted-foreground">{profile?.industry ?? 'Industry not set'}</p>
             </div>
+
+            {/* Candidates reach this page from job posts, so it is worth being
+                able to see and share what they see. */}
+            {profile?.id && <PublicProfileLinks id={profile.id} role="employer" />}
           </div>
 
           {/* Section nav */}

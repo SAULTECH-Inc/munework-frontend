@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usersApi, jobsApi, chatApi } from '@/lib/api';
+import { useAuthStore } from '@/store/auth.store';
 import { cn, getInitials, timeAgo, formatSalary } from '@/lib/utils';
 import type { EmployerProfile, Job } from '@/types';
 import toast from 'react-hot-toast';
@@ -17,6 +18,7 @@ import toast from 'react-hot-toast';
 export default function EmployerPublicProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
 
   const { data: raw, isLoading, isError } = useQuery({
     queryKey: ['public-employer', id],
@@ -101,14 +103,26 @@ export default function EmployerPublicProfilePage() {
               >
                 <Share2 className="h-4 w-4" /> Share
               </Button>
-              <Button
-                size="sm"
-                className="h-10 px-5 rounded-xl text-xs font-bold gap-2 shadow-md"
-                onClick={() => startChat.mutate()}
-                disabled={startChat.isPending}
-              >
-                <MessageSquare className="h-4 w-4" /> Message Company
-              </Button>
+              {/* Messaging needs an account. Anonymous visitors reach this page
+                  from a shared link or a job post, so send them to sign-up
+                  rather than firing a request that would only 401. */}
+              {isAuthenticated ? (
+                <Button
+                  size="sm"
+                  className="h-10 px-5 rounded-xl text-xs font-bold gap-2 shadow-md"
+                  onClick={() => startChat.mutate()}
+                  disabled={startChat.isPending}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {startChat.isPending ? 'Opening…' : 'Message Company'}
+                </Button>
+              ) : (
+                <Button asChild size="sm" className="h-10 px-5 rounded-xl text-xs font-bold gap-2 shadow-md">
+                  <Link to="/signup">
+                    <MessageSquare className="h-4 w-4" /> Message Company
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
 
