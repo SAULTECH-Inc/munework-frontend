@@ -1,0 +1,239 @@
+<!doctype html>
+<!--
+  A static, server-rendered privacy policy rather than a React route.
+
+  Google's OAuth branding review fetches this URL without executing
+  JavaScript. The SPA shell is 1.6 KB of empty markup, which is why the
+  previous /privacy attempt was rejected as "does not have sufficient
+  content" — the policy text existed only after hydration. Netlify serves a
+  real file in preference to the /* -> /index.html fallback, so this page is
+  returned as crawlable HTML at /privacy.
+
+  The contents describe the fields the application actually stores (see the
+  applicant entity) and the processors it actually calls. Keep them in sync.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Mune Work</title>
+<meta name="description" content="How Mune Work collects, uses, shares, and protects your personal data, including data obtained through Google Sign-In.">
+<link rel="canonical" href="https://munework.com/privacy">
+<link rel="icon" href="/brand/favicon-32.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --violet: #7C3AED;
+    --fuchsia: #C033F0;
+    --ink: #0F1020;
+    --body: #3F3D56;
+    --muted: #6B6880;
+    --line: #E6E3F0;
+    --panel: #FAF9FE;
+    --bg: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #F4F2FF; --body: #C9C6E0; --muted: #918DA8;
+      --line: #2A2740; --panel: #17152B; --bg: #0F0E1C;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--body);
+    font-family: Outfit, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 17px; line-height: 1.7; -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: linear-gradient(135deg, var(--violet) 0%, var(--fuchsia) 100%);
+    padding: 40px 24px 48px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+  .brand img { width: 44px; height: 44px; border-radius: 11px; display: block; }
+  .brand span { color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.03em; }
+  header h1 { color: #fff; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin: 28px 0 8px; }
+  header p { color: rgba(255,255,255,.85); margin: 0; font-size: 16px; }
+  main { padding: 48px 24px 80px; }
+  h2 {
+    color: var(--ink); font-size: 24px; font-weight: 600; letter-spacing: -0.02em;
+    margin: 48px 0 14px; padding-top: 24px; border-top: 1px solid var(--line);
+  }
+  main > .wrap > h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+  h3 { color: var(--ink); font-size: 18px; font-weight: 600; margin: 26px 0 8px; }
+  p, li { margin: 0 0 14px; }
+  ul { padding-left: 22px; }
+  li::marker { color: var(--violet); }
+  a { color: var(--violet); }
+  strong { color: var(--ink); font-weight: 600; }
+  .lede { font-size: 19px; color: var(--body); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px 24px; margin: 22px 0;
+  }
+  .panel p:last-child, .panel ul:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0 24px; font-size: 15.5px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--ink); font-weight: 600; }
+  footer {
+    border-top: 1px solid var(--line); padding: 32px 24px 56px;
+    color: var(--muted); font-size: 15px;
+  }
+  footer a { margin-right: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/">
+      <img src="/brand/logo-mark-192.png" alt="Mune Work">
+      <span>Mune Work</span>
+    </a>
+    <h1>Privacy Policy</h1>
+    <p>Last updated 1 September 2026</p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<p class="lede">Mune Work is a job marketplace. Job seekers build a profile and apply to roles; employers post roles and review applicants. This policy explains exactly what personal data we collect for that purpose, who we share it with, and the control you have over it.</p>
+
+<p>It covers <a href="https://munework.com">munework.com</a> and the Mune Work applications and APIs. In this policy, "we" and "us" mean Mune Work; "you" means anyone with a Mune Work account or who visits the site.</p>
+
+<h2>1. Data we collect</h2>
+
+<h3>Account data</h3>
+<p>Created when you register: your name, email address, account type (job seeker or employer), and a one-way hash of your password — we never store your password itself. If you turn on two-factor authentication we also store the secret and your backup codes. We record verification and account status flags.</p>
+
+<h3>Job seeker profile data</h3>
+<p>Supplied by you, and optional except where noted. Some of it is sensitive, so we list it in full:</p>
+<ul>
+  <li><strong>Contact and identity</strong> — middle name, phone number, date of birth, address and postal code, profile photo, and where you choose to provide one for identity checks, a government identification document.</li>
+  <li><strong>Professional profile</strong> — professional title and summary, years of experience, work history, and links to LinkedIn, GitHub, X/Twitter, Facebook, Instagram, YouTube, and personal portfolios.</li>
+  <li><strong>Documents</strong> — CVs, cover letters, and video CVs that you upload.</li>
+  <li><strong>Preferences</strong> — desired job titles and locations, preferred countries and companies, expected salary by currency, work types, preferred benefits, relocation openness, and auto-apply settings.</li>
+</ul>
+
+<h3>Employer data</h3>
+<p>Company name, contact details, company profile and branding, job postings, and notes or status you record against applicants.</p>
+
+<h3>Activity data</h3>
+<p>Applications you submit, jobs you save or bookmark, interviews scheduled, messages you send through the platform, and support requests.</p>
+
+<h3>Technical data</h3>
+<p>IP address, browser and device information, and sign-in times — used for security and to alert you to unfamiliar logins. If you enable push notifications, we store a device token issued by Firebase Cloud Messaging. If you enable WhatsApp updates, we store and verify your phone number.</p>
+
+<h2>2. Data from Google Sign-In</h2>
+
+<div class="panel">
+  <p>When you sign in with Google, we request only the <strong>email</strong> and <strong>profile</strong> scopes. From these we receive your Google account ID, email address, first and last name, and profile picture URL.</p>
+  <p>We use this solely to create and authenticate your Mune Work account and to pre-fill your name and photo. We do not use Google data for advertising, we do not sell it, and we do not transfer it to third parties except the processors in section 5 that host the service on our behalf.</p>
+  <p>Our use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>, including its Limited Use requirements. We do not request access to your Gmail, Drive, Calendar, or Contacts.</p>
+  <p>You can disconnect Mune Work from your Google account at any time at <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>. The same applies to sign-in through LinkedIn and Microsoft, where we likewise request only basic profile and email.</p>
+</div>
+
+<h2>3. How we use your data</h2>
+
+<table>
+  <tr><th>Purpose</th><th>What this involves</th></tr>
+  <tr><td>Running your account</td><td>Authentication, verification, password reset, two-factor authentication, and security alerts for new sign-ins.</td></tr>
+  <tr><td>Matching and recommendations</td><td>Comparing your profile and preferences against job postings to produce a match score, job recommendations, and — only if you enable it — automatic applications on your behalf.</td></tr>
+  <tr><td>Applications</td><td>Sending your profile, CV, and any cover letter to the employer whose role you apply to, and tracking status.</td></tr>
+  <tr><td>Notifications</td><td>Email, in-app, push, and (if enabled) WhatsApp messages about applications, interviews, and matches. You control these in your settings.</td></tr>
+  <tr><td>Payments</td><td>Processing subscriptions and plan upgrades.</td></tr>
+  <tr><td>Support and safety</td><td>Answering support requests, preventing fraud and abuse, and meeting legal obligations.</td></tr>
+</table>
+
+<h2>4. Automated processing and AI</h2>
+
+<p>We use AI to read documents you upload and to score how well a profile matches a role. Concretely: when you upload a CV, its text is sent to a third-party AI provider to extract structured fields such as skills, employment history, and education. We also use AI to score candidate–job fit and to read details from job flyers that employers upload.</p>
+
+<p>The providers we send this content to are <strong>Anthropic</strong> and <strong>OpenAI</strong>. We send only the document or profile content needed for the task. These providers act as processors for us and, under their API terms, do not use content submitted through their APIs to train their models.</p>
+
+<p>Match scores inform ranking and recommendations. They do not by themselves reject an application — hiring decisions are made by employers. If you enable auto-apply, applications are submitted automatically according to the thresholds and filters you set, and you can turn it off at any time.</p>
+
+<h2>5. Who we share data with</h2>
+
+<h3>Employers</h3>
+<p>When you apply to a role, that employer receives your profile, CV, cover letter, and any screening answers. Employers can see when you applied and can record notes and status against your application. Your profile visibility outside of applications is governed by your privacy settings.</p>
+
+<h3>Service providers</h3>
+<p>We use these processors to operate the service. They may handle personal data only on our instructions:</p>
+<ul>
+  <li><strong>Cloudinary</strong> — storage and delivery of CVs, images, and video CVs</li>
+  <li><strong>Resend</strong> — transactional email</li>
+  <li><strong>Google Firebase</strong> — push notification delivery</li>
+  <li><strong>Anthropic, OpenAI</strong> — AI document parsing and match scoring</li>
+  <li><strong>Paystack, Flutterwave, Stripe</strong> — payment processing. Card details are entered directly with the payment provider; we never receive or store full card numbers.</li>
+  <li><strong>Meta (WhatsApp Business), Twilio, Termii</strong> — WhatsApp and SMS delivery, only if you enable it</li>
+  <li><strong>Netlify, Vercel</strong> — application hosting</li>
+</ul>
+
+<h3>Other disclosures</h3>
+<p>We disclose data where required by law, to enforce our terms, to protect the rights and safety of users, and to a successor entity in a merger or acquisition (you would be notified).</p>
+
+<p><strong>We do not sell your personal data, and we do not share it with advertising networks.</strong></p>
+
+<h2>6. Developer API</h2>
+<p>Employers may enable API access and webhooks to integrate Mune Work with their own systems. Where an employer does this, application and candidate data relating to their own postings is transmitted to endpoints they control, and their handling of it is governed by their own privacy practices. Requests are authenticated with signed API keys and payloads are encrypted in transit.</p>
+
+<h2>7. Retention</h2>
+<ul>
+  <li><strong>Account and profile data</strong> — kept while your account is open.</li>
+  <li><strong>Applications</strong> — retained by the employer you applied to for their own record-keeping, which may outlast your account.</li>
+  <li><strong>After deletion</strong> — we remove your profile, documents, and preferences. Limited records are retained where we must: transaction records for accounting and tax, and security logs for fraud prevention.</li>
+  <li><strong>Device tokens</strong> — removed automatically once they stop being valid.</li>
+</ul>
+
+<h2>8. Your rights</h2>
+<p>You can, at any time:</p>
+<ul>
+  <li><strong>Access and correct</strong> your data — directly in your profile settings.</li>
+  <li><strong>Delete your account</strong> — in settings, which erases your profile and uploaded documents.</li>
+  <li><strong>Control notifications</strong> — per channel in your notification settings, or unsubscribe from any email using the link in its footer.</li>
+  <li><strong>Withdraw an application</strong> — from your applications page.</li>
+  <li><strong>Object or restrict</strong> — where processing relies on our legitimate interests.</li>
+  <li><strong>Export</strong> — request a copy of your data in a portable format.</li>
+</ul>
+<p>To exercise a right we cannot serve in-product, email <a href="mailto:support@munework.com">support@munework.com</a>. We respond within 30 days. If you are in the EEA or UK, you may also complain to your local data protection authority.</p>
+
+<h2>9. Security</h2>
+<p>Traffic is encrypted with TLS. Passwords are stored as one-way hashes. Sensitive integration credentials are encrypted at rest with AES-256-GCM, and API requests are authenticated with signed keys and protected against replay. Access to production data is restricted to personnel who need it. No system is perfectly secure, so we also give you two-factor authentication and alert you to unfamiliar sign-ins.</p>
+
+<h2>10. Cookies</h2>
+<p>We use cookies and browser storage that are strictly necessary to keep you signed in, to remember preferences such as theme, and to protect against abuse. We do not use advertising cookies or cross-site tracking. Blocking essential cookies will prevent sign-in from working.</p>
+
+<h2>11. International transfers</h2>
+<p>We operate internationally, and the providers in section 5 process data in various countries including the United States and the European Union. Where data leaves your region we rely on appropriate safeguards, such as Standard Contractual Clauses, in our agreements with those providers.</p>
+
+<h2>12. Children</h2>
+<p>Mune Work is for people old enough to work and is not directed at children under 16. We do not knowingly collect data from them. If you believe a child has given us data, contact us and we will delete it.</p>
+
+<h2>13. Changes to this policy</h2>
+<p>We will update this page when our practices change and revise the date at the top. For material changes affecting how we use your data, we will notify you by email or in the app before they take effect.</p>
+
+<h2>14. Contact us</h2>
+<div class="panel">
+  <p><strong>Mune Work</strong><br>
+  Privacy and data protection enquiries: <a href="mailto:support@munework.com">support@munework.com</a><br>
+  Legal notices: <a href="mailto:legal@munework.com">legal@munework.com</a></p>
+</div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="/">Home</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="mailto:support@munework.com">Contact</a>
+    <p style="margin-top:14px">© 2026 Mune Work. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
