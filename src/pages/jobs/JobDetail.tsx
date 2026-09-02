@@ -14,6 +14,7 @@ import { QuickApplyModal } from '@/pages/jobs/QuickApplyModal';
 import { jobsApi } from '@/lib/api';
 import { cn, formatSalary, timeAgo, JOB_TYPE_LABEL, EMPLOYMENT_TYPE_LABEL, LEVEL_LABEL, getMatchScoreBadge } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
+import { useSeo, useJsonLd } from '@/lib/seo';
 import type { Job } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -78,6 +79,40 @@ export default function JobDetailPage() {
     queryFn: () => jobsApi.get(id!).then(r => r.data.data ?? r.data),
     enabled: !!id,
   });
+
+  const companyName = job?.company ?? (job?.employer as any)?.companyName ?? '';
+
+  useSeo({
+    title: job ? `${job.title}${companyName ? ` at ${companyName}` : ''} | Mune Work` : 'Job | Mune Work',
+    description: job
+      ? (job.description ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 155)
+        || `${job.title} — apply on Mune Work.`
+      : undefined,
+    type: 'article',
+  });
+
+  // JobPosting is what puts a listing into the Google Jobs carousel, which is
+  // the main organic channel for a job board. Google requires title,
+  // description, datePosted and hiringOrganization at minimum.
+  useJsonLd(job ? {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: job.title,
+    description: job.description ?? job.responsibility ?? job.title,
+    datePosted: job.createdAt,
+    validThrough: job.endDate ?? undefined,
+    employmentType: job.employmentType ?? job.jobType ?? undefined,
+    hiringOrganization: companyName ? {
+      '@type': 'Organization',
+      name: companyName,
+      logo: (job.employer as any)?.companyLogo ?? undefined,
+    } : undefined,
+    jobLocation: job.location ? {
+      '@type': 'Place',
+      address: { '@type': 'PostalAddress', addressLocality: job.location },
+    } : undefined,
+    directApply: true,
+  } : null);
 
   const toggleBookmark = useMutation({
     mutationFn: () => jobsApi.toggleBookmark(id!),

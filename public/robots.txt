@@ -18,14 +18,17 @@ Disallow: /sign-documents
 Disallow: /chat
 Disallow: /network
 Disallow: /settings
-Disallow: /profile
 Disallow: /employer/
+# Anchored: a bare "Disallow: /profile" is a prefix match and would also block
+# /profile/employer/, which is the one profile surface worth indexing.
+Disallow: /profile$
 
 # Job seekers should not be findable by name in a search engine unless they
 # ask to be. Many people look for work discreetly, and a public profile being
 # openable by link is a different thing from it being indexed. Company profiles
 # are the opposite case and stay crawlable.
 Disallow: /profile/applicant/
+Allow: /profile/employer/
 
 # Auth and transactional endpoints — no standalone value, and some carry
 # single-use tokens in the query string.

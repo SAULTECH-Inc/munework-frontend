@@ -26,8 +26,15 @@ const OUT = resolve(process.cwd(), 'dist/sitemap.xml');
 
 /** changefreq/priority are hints only, but they cost nothing and Bing still reads them. */
 const STATIC_PAGES = [
-  { path: '/', changefreq: 'daily', priority: '1.0' },
-  { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
+  { path: '/',             changefreq: 'daily',   priority: '1.0' },
+  { path: '/jobs',         changefreq: 'hourly',  priority: '0.9' },
+  { path: '/companies',    changefreq: 'daily',   priority: '0.8' },
+  { path: '/plans',        changefreq: 'monthly', priority: '0.5' },
+  { path: '/hiring-guide', changefreq: 'monthly', priority: '0.5' },
+  { path: '/help',         changefreq: 'monthly', priority: '0.4' },
+  { path: '/changelog',    changefreq: 'weekly',  priority: '0.4' },
+  { path: '/terms',        changefreq: 'yearly',  priority: '0.3' },
+  { path: '/privacy',      changefreq: 'yearly',  priority: '0.3' },
 ];
 
 const today = new Date().toISOString().slice(0, 10);
@@ -41,6 +48,40 @@ function url({ path, lastmod = today, changefreq, priority }) {
     priority ? `    <priority>${priority}</priority>` : null,
     '  </url>',
   ].filter(Boolean).join('\n');
+}
+
+/** Live job postings — the highest-value URLs on the site. */
+async function fetchJobs() {
+  const out = [];
+  try {
+    for (let page = 1; page <= 50; page++) {
+      const res = await fetch(`${API}/jobs?page=${page}&limit=100&status=active`, {
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) break;
+
+      const body = await res.json();
+      const payload = body?.data ?? body;
+      const items = Array.isArray(payload) ? payload : payload?.data ?? [];
+      if (!items.length) break;
+
+      for (const j of items) {
+        if (!j?.id) continue;
+        out.push({
+          path: `/jobs/${j.id}`,
+          lastmod: (j.updatedAt ?? j.createdAt ?? today).slice(0, 10),
+          changefreq: 'weekly',
+          priority: '0.8',
+        });
+      }
+
+      const totalPages = payload?.totalPages;
+      if (totalPages && page >= totalPages) break;
+    }
+  } catch (err) {
+    console.warn(`[sitemap] job postings skipped: ${err.message}`);
+  }
+  return out;
 }
 
 async function fetchCompanies() {
@@ -77,8 +118,8 @@ async function fetchCompanies() {
   return out;
 }
 
-const companies = await fetchCompanies();
-const entries = [...STATIC_PAGES, ...companies];
+const [jobs, companies] = await Promise.all([fetchJobs(), fetchCompanies()]);
+const entries = [...STATIC_PAGES, ...jobs, ...companies];
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -88,4 +129,4 @@ ${entries.map(url).join('\n')}
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, xml);
-console.log(`[sitemap] ${entries.length} urls (${companies.length} company profiles) -> dist/sitemap.xml`);
+console.log(`[sitemap] ${entries.length} urls (${jobs.length} jobs, ${companies.length} companies) -> dist/sitemap.xml`);

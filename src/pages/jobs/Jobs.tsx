@@ -52,6 +52,10 @@ export default function JobsPage() {
 
   const effectiveLocation = city ? `${city}${country ? `, ${country}` : ''}` : country || location;
 
+  // Jobs are browsable signed out, so anything applicant-only has to be gated
+  // rather than assumed.
+  const isApplicant = useAuthStore(st => st.user?.userType === 'applicant');
+
   const params: Record<string, string> = { limit: '20', page: String(page) };
   if (search) params.q = search;
   if (effectiveLocation) params.location = effectiveLocation;
@@ -72,7 +76,8 @@ export default function JobsPage() {
   const { data: recData, isLoading: recLoading } = useQuery({
     queryKey: ['job-recommendations'],
     queryFn: () => jobsApi.getRecommendations({ limit: 20 }).then(r => r.data.data ?? r.data),
-    enabled: activeTab === 'recommended',
+    // Applicant-only endpoint — requesting it signed out only produces a 401.
+    enabled: activeTab === 'recommended' && isApplicant,
   });
 
   const allJobs: Job[] = (data as any)?.data ?? data ?? [];
@@ -112,7 +117,7 @@ export default function JobsPage() {
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-raised/60 border border-border/40">
               {([
                 { id: 'all' as Tab, label: 'All Openings', icon: Search },
-                { id: 'recommended' as Tab, label: 'Matched For You', icon: Sparkles },
+                ...(isApplicant ? [{ id: 'recommended' as Tab, label: 'Matched For You', icon: Sparkles }] : []),
               ] as const).map(tab => (
                 <button
                   key={tab.id}

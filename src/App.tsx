@@ -96,12 +96,26 @@ export default function App() {
           <Route element={<PublicProfileLayout />}>
             <Route path="/profile/applicant/:id" element={<ApplicantPublicProfilePage />} />
             <Route path="/profile/employer/:id" element={<EmployerPublicProfilePage />} />
+
+            {/* Browsable without an account. These are the pages worth ranking:
+                gating them behind /login meant a crawler saw a redirect and no
+                job posting could ever be indexed. Applicant-only actions inside
+                them (apply, bookmark, match scores) are gated individually. */}
+            <Route path="/jobs" element={<JobsPage />} />
+            <Route path="/jobs/:id" element={<JobDetailPage />} />
+            <Route path="/companies" element={<CompaniesPage />} />
+
+            {/* Static content with no reason to require a session. */}
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/plans" element={<PlansPage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/hiring-guide" element={<HiringGuidePage />} />
+            <Route path="/changelog" element={<ChangelogPage />} />
           </Route>
 
           {/* Authenticated shell */}
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<SmartDashboard />} />
-            <Route path="/jobs" element={<JobsPage />} />
             <Route path="/applications" element={<SmartApplications />} />
             <Route path="/resume" element={<ResumePage />} />
             <Route path="/employer/jobs" element={<EmployerJobsPage />} />
@@ -119,17 +133,10 @@ export default function App() {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/assessments" element={<SmartAssessments />} />
             <Route path="/employer/assessments" element={<EmployerAssessmentsPage />} />
-            <Route path="/plans" element={<PlansPage />} />
-            <Route path="/help" element={<HelpPage />} />
-            <Route path="/companies" element={<CompaniesPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/hiring-guide" element={<HiringGuidePage />} />
-            <Route path="/changelog" element={<ChangelogPage />} />
             <Route path="/profile" element={<ApplicantProfileEditPage />} />
             <Route path="/resume-builder" element={<ResumeBuilderPage />} />
             <Route path="/sign-documents" element={<SignDocumentsPage />} />
             <Route path="/employer/profile" element={<EmployerProfileEditPage />} />
-            <Route path="/jobs/:id" element={<JobDetailPage />} />
           </Route>
 
           <Route path="/403" element={<NotAuthorizedPage />} />
