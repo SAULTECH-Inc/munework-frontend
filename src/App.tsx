@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
 import { AppLayout } from '@/layouts/AppLayout';
-import { PublicProfileLayout } from '@/layouts/PublicProfileLayout';
+import { PublicLayout } from '@/layouts/PublicLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
 
 import LandingPage from '@/pages/Landing';
@@ -93,7 +93,7 @@ export default function App() {
           <Route path="/auth/social/:action/callback" element={<OAuthCallback />} />
 
           {/* Shareable profiles: readable without a session, full chrome with one */}
-          <Route element={<PublicProfileLayout />}>
+          <Route element={<PublicLayout />}>
             <Route path="/profile/applicant/:id" element={<ApplicantPublicProfilePage />} />
             <Route path="/profile/employer/:id" element={<EmployerPublicProfilePage />} />
 

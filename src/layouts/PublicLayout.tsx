@@ -4,17 +4,18 @@ import { AppLayout } from './AppLayout';
 import { Button } from '@/components/ui/button';
 
 /**
- * Wrapper for pages that must work with or without a session.
+ * Wrapper for pages that must work with or without a session: job listings,
+ * company profiles, and the static content pages.
  *
- * Public profiles are meant to be shareable — a candidate sending a link to a
- * recruiter, a company profile reached from a job post — so they cannot sit
+ * These are the pages worth ranking and worth sharing — a job link sent to a
+ * candidate, a company profile reached from a listing — so they cannot sit
  * under AppLayout, which redirects anonymous visitors to /login.
  *
  * Signed-in visitors still get the full app chrome: this is the same page they
  * reach from search or a job listing, and losing the sidebar mid-session would
  * feel like being logged out. Anonymous visitors get a marketing shell instead.
  */
-export function PublicProfileLayout() {
+export function PublicLayout() {
   const { isAuthenticated, _hasHydrated } = useAuthStore();
 
   // Waiting for the persisted store avoids a flash of the signed-out header
@@ -28,7 +29,7 @@ export function PublicProfileLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <img src="/icon.svg" alt="" className="h-8 w-8 rounded-lg" />
             <span className="font-bold text-base tracking-tight text-foreground">Mune Work</span>
@@ -50,7 +51,7 @@ export function PublicProfileLayout() {
       </main>
 
       <footer className="border-t border-border mt-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Mune Work. Find work that fits.
           </p>
