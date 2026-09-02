@@ -16,6 +16,7 @@ import { usersApi, chatApi } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { cn, getInitials } from '@/lib/utils';
 import type { ApplicantProfile } from '@/types';
+import { useSeo } from '@/lib/seo';
 
 export default function ApplicantPublicProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,18 @@ export default function ApplicantPublicProfilePage() {
   });
 
   const profile = raw as ApplicantProfile | undefined;
+
+  // noindex, matching the robots.txt rule: the profile is shareable by link,
+  // but someone job-hunting quietly should not surface in a search for their
+  // name. Titled anyway so the browser tab and any link preview read sensibly.
+  useSeo({
+    title: profile ? `${profile.firstName} ${profile.lastName} — Mune Work` : 'Profile — Mune Work',
+    description: profile?.professionalSummary?.slice(0, 155)
+      ?? profile?.professionalTitle
+      ?? 'A Mune Work candidate profile.',
+    noindex: true,
+    type: 'profile',
+  });
 
   const [showAllExp, setShowAllExp] = useState(false);
   const [copied, setCopied] = useState(false);

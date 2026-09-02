@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build": "tsc -b && vite build && node scripts/gen-sitemap.mjs",
+    "preview": "vite preview",
+    "sitemap": "node scripts/gen-sitemap.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

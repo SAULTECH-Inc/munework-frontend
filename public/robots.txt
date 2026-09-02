@@ -1,0 +1,44 @@
+# https://munework.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Signed-in application routes. These redirect to /login for a crawler, so
+# indexing them wastes crawl budget and surfaces useless results.
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /saved-jobs
+Disallow: /auto-apply
+Disallow: /notifications
+Disallow: /schedules
+Disallow: /assessments
+Disallow: /resume
+Disallow: /resume-builder
+Disallow: /sign-documents
+Disallow: /chat
+Disallow: /network
+Disallow: /settings
+Disallow: /profile
+Disallow: /employer/
+
+# Job seekers should not be findable by name in a search engine unless they
+# ask to be. Many people look for work discreetly, and a public profile being
+# openable by link is a different thing from it being indexed. Company profiles
+# are the opposite case and stay crawlable.
+Disallow: /profile/applicant/
+
+# Auth and transactional endpoints — no standalone value, and some carry
+# single-use tokens in the query string.
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /reset-success
+Disallow: /verify-otp
+Disallow: /auth/
+Disallow: /unsubscribe
+Disallow: /email-preferences
+Disallow: /payment/
+Disallow: /403
+
+Sitemap: https://munework.com/sitemap.xml

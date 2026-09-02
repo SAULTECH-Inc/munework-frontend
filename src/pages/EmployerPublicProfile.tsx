@@ -13,6 +13,7 @@ import { usersApi, jobsApi, chatApi } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { cn, getInitials, timeAgo, formatSalary } from '@/lib/utils';
 import type { EmployerProfile, Job } from '@/types';
+import { useSeo, useJsonLd } from '@/lib/seo';
 import toast from 'react-hot-toast';
 
 export default function EmployerPublicProfilePage() {
@@ -34,6 +35,32 @@ export default function EmployerPublicProfilePage() {
 
   const profile = raw as EmployerProfile | undefined;
   const jobs: Job[] = Array.isArray(jobsRaw) ? jobsRaw : (jobsRaw as any)?.data ?? [];
+
+  // Company pages are the one public surface worth ranking, so they get a real
+  // title, their own logo as the preview image, and Organization markup.
+  useSeo({
+    title: profile ? `${profile.companyName} — Jobs and company profile | Mune Work` : 'Company — Mune Work',
+    description: profile
+      ? (profile.companyDescription ?? profile.aboutCompany ?? '')
+          .replace(/\s+/g, ' ').trim().slice(0, 155)
+        || `${profile.companyName} is hiring on Mune Work. See open roles and company details.`
+      : undefined,
+    image: profile?.companyLogo,
+    type: 'profile',
+  });
+
+  useJsonLd(profile ? {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: profile.companyName,
+    url: `${window.location.origin}/profile/employer/${profile.id}`,
+    logo: profile.companyLogo,
+    description: profile.companyDescription ?? profile.aboutCompany,
+    sameAs: [
+      profile.companyWebsite, profile.linkedInProfile, profile.twitterProfile,
+      profile.facebookProfile, profile.instagramProfile,
+    ].filter(Boolean),
+  } : null);
 
   const startChat = useMutation({
     mutationFn: () => chatApi.startDirect(id!),
