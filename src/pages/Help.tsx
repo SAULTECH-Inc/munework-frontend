@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { helpApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useSeo } from '@/lib/seo';
 
 // ─── Static content ───────────────────────────────────────────────────────────
 
@@ -89,6 +90,11 @@ const TUTORIALS = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HelpPage() {
+  useSeo({
+    title: 'Help and Support | Mune Work',
+    description: 'Answers to common questions about applying, hiring, your profile and your account, plus how to reach the Mune Work team.',
+  });
+
   const [searchQuery,  setSearchQuery]  = useState('');
   const [selectedCat,  setSelectedCat]  = useState('all');
   const [expandedFaq,  setExpandedFaq]  = useState<number | null>(null);

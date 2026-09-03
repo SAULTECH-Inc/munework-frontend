@@ -2,7 +2,13 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <!-- Google picks the favicon for a search result from these, and wants one
+         at least 48x48 at a stable URL. An SVG alone is accepted but a raster
+         fallback is what actually gets shown most reliably. -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/brand/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/brand/favicon-16.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Mune Work — Find work that fits. Hire people who fit.</title>
     <meta name="description" content="Mune Work matches job seekers to roles that fit their skills and preferences, and gives employers ranked candidates instead of a pile of CVs. Build a profile, get matched, apply in one click." />
@@ -34,15 +40,52 @@
     <!-- iOS ignores SVG here and falls back to a screenshot of the page. -->
     <link rel="apple-touch-icon" href="/brand/logo-mark-180.png" />
 
+    <!--
+      WebSite is what Google reads to decide the site name shown above a
+      result — the bold "Mune Work" line rather than a guess from the domain.
+      Organization drives the knowledge panel and the result favicon.
+
+      Note there is no SearchAction here: Google deprecated the sitelinks
+      searchbox in 2024 and no longer renders it, so including it is noise.
+      The sub-links under a result are sitelinks, which are generated
+      algorithmically from site structure and traffic and cannot be requested
+      through markup.
+    -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Mune Work",
-        "url": "https://munework.com",
-        "logo": "https://munework.com/brand/logo-mark-512.png",
-        "description": "A job marketplace that matches candidates to roles on skills, preferences and fit.",
-        "email": "support@munework.com"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://munework.com/#website",
+            "url": "https://munework.com",
+            "name": "Mune Work",
+            "alternateName": ["MuneWork", "Mune"],
+            "publisher": { "@id": "https://munework.com/#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://munework.com/#organization",
+            "name": "Mune Work",
+            "alternateName": "MuneWork",
+            "url": "https://munework.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://munework.com/brand/logo-mark-512.png",
+              "width": 512,
+              "height": 512
+            },
+            "image": "https://munework.com/brand/og-image-1200x630.png",
+            "description": "A job marketplace that matches candidates to roles on skills, preferences and fit.",
+            "email": "support@munework.com",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "support@munework.com",
+              "availableLanguage": "English"
+            }
+          }
+        ]
       }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

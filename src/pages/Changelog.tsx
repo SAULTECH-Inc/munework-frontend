@@ -3,6 +3,7 @@ import { Zap, Bug, Star, ArrowUp, Shield, Sparkles, CheckCircle2 } from 'lucide-
 import { TopBar } from '@/components/common/TopBar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useSeo } from '@/lib/seo';
 
 type TagType = 'feature' | 'improvement' | 'fix' | 'security' | 'performance';
 
@@ -93,6 +94,11 @@ const RELEASES: Release[] = [
 ];
 
 export default function ChangelogPage() {
+  useSeo({
+    title: "What's New | Mune Work",
+    description: 'Recent releases, improvements and fixes on Mune Work.',
+  });
+
   const [activeTag, setActiveTag] = useState<TagType | null>(null);
 
   const filtered = RELEASES.map(r => ({

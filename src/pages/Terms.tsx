@@ -6,6 +6,7 @@ import {
 import { TopBar } from '@/components/common/TopBar';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useSeo } from '@/lib/seo';
 
 const LAST_UPDATED = 'June 18, 2025';
 const VERSION = '3.0';
@@ -381,6 +382,11 @@ function HighlightBox({ type, children, className }: {
 }
 
 export default function TermsPage() {
+  useSeo({
+    title: 'Terms of Service | Mune Work',
+    description: 'The terms that govern your use of Mune Work, for both job seekers and employers.',
+  });
+
   const [search, setSearch] = useState('');
   const [showToc, setShowToc] = useState(true);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());

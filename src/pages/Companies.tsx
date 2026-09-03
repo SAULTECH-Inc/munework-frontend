@@ -13,6 +13,7 @@ import { companiesApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useSeo } from '@/lib/seo';
 
 type ViewMode = 'grid' | 'list';
 type SortField = 'companyName' | 'industry' | 'location' | 'employeeCount' | 'foundedYear' | 'rating' | 'openPositions';
@@ -54,6 +55,11 @@ interface Company {
 }
 
 export default function CompaniesPage() {
+  useSeo({
+    title: 'Companies Hiring Now | Mune Work',
+    description: 'Discover companies hiring on Mune Work. Explore employer profiles, see what they do, and browse their open roles.',
+  });
+
   const navigate = useNavigate();
   const qc = useQueryClient();
 

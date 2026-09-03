@@ -13,6 +13,7 @@ import { subscriptionsApi } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useSeo } from '@/lib/seo';
 
 type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
 type Gateway = 'PAYSTACK' | 'STRIPE' | 'FLUTTERWAVE';
@@ -61,6 +62,11 @@ const GATEWAYS: { id: Gateway; label: string; sub: string; icon: React.ElementTy
 ];
 
 export default function PlansPage() {
+  useSeo({
+    title: 'Pricing and Plans | Mune Work',
+    description: 'Simple pricing for job seekers and employers. Compare plans and pick the one that fits how you hire or how you search.',
+  });
+
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { user } = useAuthStore();

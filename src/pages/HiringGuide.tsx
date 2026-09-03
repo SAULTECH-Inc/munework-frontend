@@ -6,6 +6,7 @@ import { TopBar } from '@/components/common/TopBar';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
+import { useSeo } from '@/lib/seo';
 
 const STEPS = [
   {
@@ -54,6 +55,11 @@ const TIPS = [
 ];
 
 export default function HiringGuidePage() {
+  useSeo({
+    title: 'Hiring Guide for Employers | Mune Work',
+    description: 'How to write a job post that attracts the right people, screen candidates fairly, and hire faster on Mune Work.',
+  });
+
   const navigate = useNavigate();
   const { user } = useAuthStore();
 

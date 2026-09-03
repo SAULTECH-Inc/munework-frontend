@@ -18,6 +18,7 @@ import { COUNTRIES } from '@/lib/profile-data';
 import type { Job } from '@/types';
 import { TopBar } from '@/components/common/TopBar';
 import { useAuthStore } from '@/store/auth.store';
+import { useSeo } from '@/lib/seo';
 
 const COUNTRY_OPTIONS = COUNTRIES.map(c => ({ label: c, value: c }));
 
@@ -30,6 +31,11 @@ const SALARY_FREQ = ['hourly', 'monthly', 'yearly'];
 type Tab = 'all' | 'recommended';
 
 export default function JobsPage() {
+  useSeo({
+    title: 'Browse Jobs — Find Your Next Role | Mune Work',
+    description: 'Search jobs across every industry and location. Filter by salary, work mode and experience level, and apply in one click with a profile that follows you.',
+  });
+
   const [searchParams, setSearchParams] = useSearchParams();
   const qc = useQueryClient();
 
