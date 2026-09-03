@@ -19,6 +19,7 @@ import type { Job } from '@/types';
 import { TopBar } from '@/components/common/TopBar';
 import { useAuthStore } from '@/store/auth.store';
 import { useSeo } from '@/lib/seo';
+import { BrowseJobsBy } from '@/components/common/BrowseJobsBy';
 
 const COUNTRY_OPTIONS = COUNTRIES.map(c => ({ label: c, value: c }));
 
@@ -436,6 +437,13 @@ export default function JobsPage() {
           onClose={() => setApplyJob(null)}
         />
       )}
+
+      {/* Gives the category pages inbound links from the page crawlers reach
+          first. Without these they are only discoverable via the sitemap,
+          which says nothing about how they relate to each other. */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-16 w-full">
+        <BrowseJobsBy />
+      </div>
     </>
   );
 }
@@ -482,7 +490,7 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function JobCard({ job, selected, compact, showMatchScore, onSelect, onApply, onBookmark }: JobCardProps) {
+export function JobCard({ job, selected, compact, showMatchScore, onSelect, onApply, onBookmark }: JobCardProps) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [showAllSkills, setShowAllSkills] = useState(false);
@@ -638,7 +646,7 @@ function JobCard({ job, selected, compact, showMatchScore, onSelect, onApply, on
   );
 }
 
-function JobCardSkeleton() {
+export function JobCardSkeleton() {
   return (
     <div className="glass rounded-2xl border border-border/50 p-5 space-y-4 animate-pulse">
       <div className="flex gap-3">

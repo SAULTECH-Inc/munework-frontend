@@ -19,6 +19,7 @@
  */
 import { writeFileSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
+import { readFileSync } from 'fs';
 
 const SITE = process.env.VITE_SITE_URL || 'https://munework.com';
 const API = (process.env.VITE_API_BASE_URL || 'https://backend-gamma-liart-35.vercel.app/api/v1').replace(/\/$/, '');
@@ -38,6 +39,37 @@ const STATIC_PAGES = [
 ];
 
 const today = new Date().toISOString().slice(0, 10);
+
+/**
+ * Category slugs are read out of the source rather than duplicated here, so a
+ * category added to job-categories.ts appears in the sitemap automatically.
+ * Parsed with a regex because the module is TypeScript and this script runs as
+ * plain node with no build step.
+ */
+function categoryPaths() {
+  try {
+    const src = readFileSync(resolve(process.cwd(), 'src/lib/job-categories.ts'), 'utf-8');
+    const slugs = [...src.matchAll(/^\s*slug:\s*[`'"]([^`'"]+)[`'"]/gm)]
+      .map((m) => m[1])
+      // The location entries declare their slug as a template literal
+      // (`in/${slug}`), which matches the pattern but is not a real path. The
+      // cities are picked up from the tuple list below instead.
+      .filter((slug) => !slug.includes('${'));
+
+    // Location entries are built as `in/${slug}` from a tuple list, so pick
+    // those up separately.
+    const cities = [...src.matchAll(/^\s*\['([a-z-]+)',\s*'[^']+'\],?$/gm)].map((m) => `in/${m[1]}`);
+
+    return [...new Set([...slugs, ...cities])].map((slug) => ({
+      path: `/jobs/${slug}`,
+      changefreq: 'daily',
+      priority: '0.8',
+    }));
+  } catch (err) {
+    console.warn(`[sitemap] category pages skipped: ${err.message}`);
+    return [];
+  }
+}
 
 function url({ path, lastmod = today, changefreq, priority }) {
   return [
@@ -118,8 +150,9 @@ async function fetchCompanies() {
   return out;
 }
 
+const categories = categoryPaths();
 const [jobs, companies] = await Promise.all([fetchJobs(), fetchCompanies()]);
-const entries = [...STATIC_PAGES, ...jobs, ...companies];
+const entries = [...STATIC_PAGES, ...categories, ...jobs, ...companies];
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -129,4 +162,7 @@ ${entries.map(url).join('\n')}
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, xml);
-console.log(`[sitemap] ${entries.length} urls (${jobs.length} jobs, ${companies.length} companies) -> dist/sitemap.xml`);
+console.log(
+  `[sitemap] ${entries.length} urls ` +
+  `(${categories.length} categories, ${jobs.length} jobs, ${companies.length} companies) -> dist/sitemap.xml`,
+);

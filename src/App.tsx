@@ -48,6 +48,8 @@ import ChangelogPage from '@/pages/Changelog';
 import ApplicantProfileEditPage from '@/pages/applicant/Profile';
 import EmployerProfileEditPage from '@/pages/employer/Profile';
 import JobDetailPage from '@/pages/jobs/JobDetail';
+import JobCategoryPage from '@/pages/jobs/JobCategory';
+import JobSlugRoute from '@/pages/jobs/JobSlugRoute';
 import ResumeBuilderPage from '@/pages/applicant/ResumeBuilder';
 import SignDocumentsPage from '@/pages/SignDocuments';
 import CandidateScoutPage from '@/pages/employer/CandidateScout';
@@ -102,7 +104,12 @@ export default function App() {
                 job posting could ever be indexed. Applicant-only actions inside
                 them (apply, bookmark, match scores) are gated individually. */}
             <Route path="/jobs" element={<JobsPage />} />
-            <Route path="/jobs/:id" element={<JobDetailPage />} />
+            {/* /jobs/in/:city is unambiguous. /jobs/:slug is shared between
+                category pages and job detail, resolved at runtime — two
+                same-shaped dynamic routes cannot be ranked against each
+                other and the first would swallow the second. */}
+            <Route path="/jobs/in/:city" element={<JobCategoryPage />} />
+            <Route path="/jobs/:slug" element={<JobSlugRoute />} />
             <Route path="/companies" element={<CompaniesPage />} />
 
             {/* Static content with no reason to require a session. */}
