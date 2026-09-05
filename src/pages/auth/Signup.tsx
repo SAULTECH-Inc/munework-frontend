@@ -125,7 +125,8 @@ export default function SignupPage() {
     }
   }
 
-  const oauthBase = import.meta.env.VITE_API_BASE_URL;
+  const apiRaw = (import.meta.env.VITE_API_BASE_URL ?? '/api/v1').replace(/\/+$/, '');
+  const oauthBase = apiRaw.endsWith('/api/v1') ? apiRaw : `${apiRaw}/api/v1`;
 
   return (
     <div className="w-full max-w-sm space-y-6">

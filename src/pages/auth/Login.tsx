@@ -164,6 +164,13 @@ export default function LoginPage() {
       setValue('email', savedEmail);
       setValue('rememberMe', true);
     }
+
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get('error');
+    if (errorParam) {
+      setLoginError(decodeURIComponent(errorParam));
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, [setValue]);
 
   useEffect(() => {
@@ -276,7 +283,8 @@ export default function LoginPage() {
     }
   }
 
-  const oauthBase = import.meta.env.VITE_API_BASE_URL;
+  const apiRaw = (import.meta.env.VITE_API_BASE_URL ?? '/api/v1').replace(/\/+$/, '');
+  const oauthBase = apiRaw.endsWith('/api/v1') ? apiRaw : `${apiRaw}/api/v1`;
 
   const cardClass = 'glass rounded-2xl border border-border/60 p-7 space-y-5 shadow-[0_8px_40px_rgba(0,0,0,0.25)]';
 
