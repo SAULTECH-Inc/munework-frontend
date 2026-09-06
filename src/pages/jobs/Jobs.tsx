@@ -392,11 +392,15 @@ export default function JobsPage() {
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
                 <Search className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-base font-bold font-['Outfit',sans-serif]">No jobs found</h3>
+              <h3 className="text-base font-bold font-['Outfit',sans-serif]">
+                {activeTab === 'recommended' ? 'No strong matches yet' : 'No jobs found'}
+              </h3>
               <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-                Try searching for a different keyword or clearing your filters.
+                {activeTab === 'recommended'
+                  ? "We only surface roles that genuinely fit your profile. Complete or update your CV and preferences, and check back as new openings are posted."
+                  : 'Try searching for a different keyword or clearing your filters.'}
               </p>
-              {hasFilters && (
+              {activeTab === 'all' && hasFilters && (
                 <Button size="sm" variant="outline" onClick={clearFilters} className="mt-4 text-xs">
                   Clear filters
                 </Button>
