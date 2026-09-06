@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TopBar } from '@/components/common/TopBar';
 import { PostJobModal } from './PostJobModal';
 import { jobsApi } from '@/lib/api';
+import { Pagination } from '@/components/common/Pagination';
 import { cn, timeAgo, JOB_TYPE_LABEL, formatSalary } from '@/lib/utils';
 import type { Job, JobStatus } from '@/types';
 import toast from 'react-hot-toast';
@@ -43,6 +44,8 @@ export default function EmployerJobsPage() {
   const [activeTab, setActiveTab] = useState<TabStatus>('all');
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 10;
 
   const { data, isLoading } = useQuery({
     queryKey: ['employer-jobs-all'],
@@ -107,6 +110,11 @@ export default function EmployerJobsPage() {
     });
     return list;
   }, [allJobs, activeTab, search, sortKey]);
+
+  // Keep the page in range as the filtered set changes.
+  const totalPages = Math.max(1, Math.ceil(jobs.length / PER_PAGE));
+  const pagedJobs = jobs.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  if (page > totalPages && page !== 1) setPage(1);
 
   return (
     <>
@@ -210,7 +218,7 @@ export default function EmployerJobsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {jobs.map(job => (
+            {pagedJobs.map(job => (
               <JobRow
                 key={job.id}
                 job={job}
@@ -225,6 +233,7 @@ export default function EmployerJobsPage() {
                 deleting={deleteJob.isPending && deleteJob.variables === job.id}
               />
             ))}
+            <Pagination page={page} totalPages={totalPages} onChange={setPage} className="mt-4" />
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Pagination } from '@/components/common/Pagination';
 import { Sparkles, SlidersHorizontal, MessageSquare, Calendar, X, Send, Video, Phone, Users, Loader2, Search, ArrowUpDown, Lock, Unlock, FileText, Briefcase, GraduationCap, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,8 @@ type SortKey = 'date' | 'score' | 'name';
 export default function CandidatesPage() {
   const { jobId: paramJobId } = useParams();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(paramJobId ?? null);
+  const [pickerPage, setPickerPage] = useState(1);
+  const PICKER_PER_PAGE = 12;
   const jobId = selectedJobId;
 
   const [filterStatus, setFilterStatus] = useState<string>('');
@@ -149,7 +152,7 @@ export default function CandidatesPage() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {allJobs.map((j: any) => {
+              {allJobs.slice((pickerPage - 1) * PICKER_PER_PAGE, pickerPage * PICKER_PER_PAGE).map((j: any) => {
                 const count = j._count?.applications ?? j.applicationsCount ?? 0;
                 return (
                   <button
@@ -177,6 +180,12 @@ export default function CandidatesPage() {
               })}
             </div>
           )}
+          <Pagination
+            page={pickerPage}
+            totalPages={Math.ceil(allJobs.length / PICKER_PER_PAGE)}
+            onChange={setPickerPage}
+            className="mt-5"
+          />
         </div>
       </>
     );
