@@ -257,7 +257,15 @@ export interface Job {
   hiringManager?: string;
   screeningQuestions?: ScreeningQuestion[];
   aiSettings?: AiSettings;
-  applicationMethod?: Record<string, boolean>;
+  applicationMethod?: {
+    byCv?: boolean;
+    byVideo?: boolean;
+    byPortfolio?: boolean;
+    byProfile?: boolean;
+    byCoverLetter?: boolean;
+    external?: boolean;
+    externalUrl?: string;
+  };
   isBookmarked?: boolean;
   hasApplied?: boolean;
   employer?: EmployerProfile;

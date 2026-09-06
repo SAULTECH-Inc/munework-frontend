@@ -29,6 +29,16 @@ export function QuickApplyModal({ job, open, onClose }: Props) {
   const [applied, setApplied] = useState(false);
   const [generatingCover, setGeneratingCover] = useState(false);
 
+  // Safety net for every entry point: an external job has no in-app
+  // application, so if this modal is opened for one, redirect and close rather
+  // than showing an apply form that would submit nothing.
+  useEffect(() => {
+    if (open && job.applicationMethod?.external && job.applicationMethod.externalUrl) {
+      window.open(job.applicationMethod.externalUrl, '_blank', 'noopener,noreferrer');
+      onClose();
+    }
+  }, [open, job, onClose]);
+
   // Video application state
   const requiresVideo = !!job.applicationMethod?.byVideo;
   const [videoFile, setVideoFile] = useState<File | null>(null);

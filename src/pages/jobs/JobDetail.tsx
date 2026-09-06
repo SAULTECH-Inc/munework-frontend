@@ -80,6 +80,17 @@ export default function JobDetailPage() {
     enabled: !!id,
   });
 
+  // External jobs are applied to off-platform: send the applicant to the
+  // employer's URL in a new tab instead of opening the in-app application flow.
+  const isExternal = !!job?.applicationMethod?.external && !!job?.applicationMethod?.externalUrl;
+  const startApply = () => {
+    if (isExternal) {
+      window.open(job!.applicationMethod!.externalUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setApplyOpen(true);
+  };
+
   const companyName = job?.company ?? (job?.employer as any)?.companyName ?? '';
 
   useSeo({
@@ -185,8 +196,8 @@ export default function JobDetailPage() {
             <p className="text-sm font-bold truncate">{job.title}</p>
             <p className="text-xs text-muted-foreground">{job.employer?.companyName}</p>
           </div>
-          <Button size="sm" onClick={() => setApplyOpen(true)} disabled={job.hasApplied} className="shrink-0">
-            {job.hasApplied ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Applied</> : 'Apply Now'}
+          <Button size="sm" onClick={startApply} disabled={!isExternal && job.hasApplied} className="shrink-0">
+            {isExternal ? <><ExternalLink className="h-3.5 w-3.5 mr-1.5" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Applied</> : 'Apply Now'}
           </Button>
         </div>
       )}
@@ -256,11 +267,11 @@ export default function JobDetailPage() {
                 </button>
                 {isApplicant && (
                   <Button
-                    onClick={() => setApplyOpen(true)}
-                    disabled={job.hasApplied}
+                    onClick={startApply}
+                    disabled={!isExternal && job.hasApplied}
                     className={cn('gap-2 font-bold px-5', job.hasApplied && 'bg-success/20 text-success border border-success/30 hover:bg-success/20')}
                   >
-                    {job.hasApplied ? <><CheckCircle2 className="h-4 w-4" />Applied</> : <><Zap className="h-4 w-4" />Apply Now</>}
+                    {isExternal ? <><ExternalLink className="h-4 w-4" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-4 w-4" />Applied</> : <><Zap className="h-4 w-4" />Apply Now</>}
                   </Button>
                 )}
               </div>
@@ -330,8 +341,8 @@ export default function JobDetailPage() {
                     {job.hasApplied ? "You've already applied. We'll keep you updated." : 'Apply in under 2 minutes using your saved CV and cover letter.'}
                   </p>
                 </div>
-                <Button onClick={() => setApplyOpen(true)} disabled={job.hasApplied} size="sm" className="shrink-0">
-                  {job.hasApplied ? 'Applied' : 'Apply Now'}
+                <Button onClick={startApply} disabled={!isExternal && job.hasApplied} size="sm" className="shrink-0">
+                  {isExternal ? 'Apply externally' : job.hasApplied ? 'Applied' : 'Apply Now'}
                 </Button>
               </div>
             )}
