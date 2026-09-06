@@ -13,6 +13,7 @@ import DatePicker from '@/components/ui/date-picker';
 import TimePicker from '@/components/ui/time-picker';
 import { TopBar } from '@/components/common/TopBar';
 import { MatchDetailsModal } from '@/components/features/MatchDetailsModal';
+import { FileViewerModal } from '@/components/common/FileViewerModal';
 import { jobsApi, chatApi } from '@/lib/api';
 import { cn, APPLICATION_STATUS_COLOR, APPLICATION_STATUS_LABEL, timeAgo, getInitials, getMatchScoreBadge } from '@/lib/utils';
 import type { Application } from '@/types';
@@ -559,6 +560,7 @@ function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
 }) {
   const [showMessage, setShowMessage] = useState(false);
   const [showMatchDetails, setShowMatchDetails] = useState(false);
+  const [viewFile, setViewFile] = useState<{ url: string; title: string } | null>(null);
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
 
   const applicantName = app.applicant
@@ -609,10 +611,10 @@ function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
           {applicant.phoneNumber && <p className="text-xs text-muted-foreground">{applicant.phoneNumber}</p>}
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {cvLink && (
-              <a href={cvLink} target="_blank" rel="noreferrer"
+              <button type="button" onClick={() => setViewFile({ url: cvLink, title: `${applicantName} — CV` })}
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-primary border border-primary/30 bg-primary/5 rounded-lg px-2 py-1 hover:bg-primary/10">
                 <FileText className="h-3 w-3" /> View CV
-              </a>
+              </button>
             )}
             <Link to={`/profile/applicant/${app.applicantId}`} target="_blank"
               className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground border border-border rounded-lg px-2 py-1 hover:text-foreground hover:border-primary/30">
@@ -738,10 +740,10 @@ function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
               <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{app.coverLetter}</p>
             </div>
           ) : coverLetterLink ? (
-            <a href={coverLetterLink} target="_blank" rel="noreferrer"
+            <button type="button" onClick={() => setViewFile({ url: coverLetterLink, title: `${applicantName} — Cover Letter` })}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-primary border border-primary/30 bg-primary/5 rounded-lg px-3 py-2 hover:bg-primary/10">
               <FileText className="h-3.5 w-3.5" /> Open submitted cover letter
-            </a>
+            </button>
           ) : (
             <p className="text-xs text-muted-foreground">No cover letter submitted.</p>
           )}
@@ -809,6 +811,12 @@ function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
         applicantId={(app.applicant as any)?.id ?? (app as any).applicantId ?? ''}
         jobId={app.jobId ?? (app as any).job?.id ?? ''}
         applicantName={applicantName}
+      />
+      <FileViewerModal
+        open={!!viewFile}
+        url={viewFile?.url}
+        title={viewFile?.title}
+        onClose={() => setViewFile(null)}
       />
     </div>
   );

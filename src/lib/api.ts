@@ -194,6 +194,13 @@ export const usersApi = {
   getProfileCompleteness: ()             => api.get('/applicants/me/completeness'),
 };
 
+// ─── Files ────────────────────────────────────────────────────────────────────
+export const filesApi = {
+  // Streams an uploaded file (CV / cover letter) inline through the backend,
+  // authenticated, so it can be shown in an in-app modal.
+  proxy: (url: string) => api.get('/files/proxy', { params: { url }, responseType: 'blob' }),
+};
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 export const notificationsApi = {
   list:               (params?: any) => api.get('/notifications', { params }),
