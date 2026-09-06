@@ -125,8 +125,19 @@ export const jobsApi = {
   getRecommendations:   (params?: any) => api.get('/jobs/my/recommendations', { params }),
   getEmployerJobs:      (params?: any) => api.get('/jobs/employer/my-jobs', { params }),
   getApplicationsForJob: (jobId: string, params?: any) => api.get(`/jobs/${jobId}/applications`, { params }),
-  updateApplicationStatus: (appId: string, status: string, notes?: string) =>
-    api.patch(`/jobs/applications/${appId}/status`, { status, notes }),
+  updateApplicationStatus: (
+    appId: string,
+    status: string,
+    notes?: string,
+    extra?: { letter?: { subject?: string; body?: string }; saveAsDefault?: boolean },
+  ) => api.patch(`/jobs/applications/${appId}/status`, { status, notes, ...extra }),
+  getLetterTemplate: (status: string) =>
+    api.get('/jobs/letter-template', { params: { status } }),
+  exportApplicants: (jobId: string, status: string, format: 'xlsx' | 'docx') =>
+    api.get(`/jobs/${jobId}/applications/export`, {
+      params: { status, format },
+      responseType: 'blob',
+    }),
   scheduleInterview: (appId: string, data: any) =>
     api.post(`/jobs/applications/${appId}/interview`, data),
   screenApplicants:    (jobId: string) => api.post(`/jobs/${jobId}/screen`),

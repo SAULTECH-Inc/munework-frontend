@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Pagination } from '@/components/common/Pagination';
-import { Sparkles, SlidersHorizontal, MessageSquare, Calendar, X, Send, Video, Phone, Users, Loader2, Search, ArrowUpDown, Lock, Unlock, FileText, Briefcase, GraduationCap, ChevronRight } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, MessageSquare, Calendar, X, Send, Video, Phone, Users, Loader2, Search, ArrowUpDown, Lock, Unlock, FileText, Briefcase, GraduationCap, ChevronRight, Download, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,6 +41,17 @@ function statusOptions(current?: string): string[] {
 // disabled in the dropdown.
 const NON_SETTABLE = new Set(['viewed', 'withdrawn']);
 
+// Statuses that send the applicant a formal letter (composer opens on select).
+const LETTER_STATUSES = ['shortlisted', 'rejected', 'offer_extended', 'hired'];
+
+// Status filters offered in the export menu.
+const EXPORT_STATUSES: { value: string; label: string }[] = [
+  { value: 'all', label: 'All applicants' },
+  { value: 'shortlisted', label: 'Shortlisted' },
+  { value: 'interview_scheduled', label: 'Interview scheduled' },
+  { value: 'hired', label: 'Hired' },
+];
+
 // Every status a candidate can be in, for the filter dropdown (includes the
 // auto/terminal ones an employer can't set but can filter by).
 const FILTER_STATUSES = [
@@ -68,6 +79,9 @@ export default function CandidatesPage() {
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [scheduleApp, setScheduleApp] = useState<Application | null>(null);
+  const [letterAction, setLetterAction] = useState<{ app: Application; status: string } | null>(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const qc = useQueryClient();
 
   // When no jobId in URL, fetch job list so user can pick one
@@ -133,7 +147,36 @@ export default function CandidatesPage() {
   // actual date/time/link. Everything else is a direct status update.
   const handleStatusChange = (app: Application, status: string) => {
     if (status === 'interview_scheduled') { setScheduleApp(app); return; }
+    // Reject / shortlist / offer / hire send the candidate a real letter — open
+    // the letter composer so the employer can review, edit and (optionally) save
+    // it as their default, rather than firing a bare status change.
+    if (LETTER_STATUSES.includes(status)) { setLetterAction({ app, status }); return; }
     updateStatus.mutate({ appId: app.id, status });
+  };
+
+  const runExport = async (status: string, format: 'xlsx' | 'docx') => {
+    if (!jobId) { toast.error('Select a job first'); return; }
+    setExportMenuOpen(false);
+    setExporting(true);
+    try {
+      const res = await jobsApi.exportApplicants(jobId, status, format);
+      const blob = new Blob([res.data], { type: (res.headers as any)['content-type'] });
+      const cd = (res.headers as any)['content-disposition'] || '';
+      const match = /filename="?([^"]+)"?/.exec(cd);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = match ? match[1] : `candidates.${format === 'docx' ? 'docx' : 'xlsx'}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success('Download started');
+    } catch {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
   };
 
   const rawApps: Application[] = (data as any)?.data ?? data ?? [];
@@ -264,6 +307,37 @@ export default function CandidatesPage() {
               <span className="hidden sm:inline">{screening ? 'Screening…' : 'AI Screen All'}</span>
               <span className="sm:hidden">{screening ? '…' : 'AI Screen'}</span>
             </Button>
+
+            {/* Export applicants (Excel / Word), filtered by status */}
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setExportMenuOpen(o => !o)}
+                disabled={exporting}
+                className="text-xs gap-1 px-2 sm:px-3 h-8"
+              >
+                {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Download className="h-3.5 w-3.5 shrink-0" />}
+                <span className="hidden sm:inline">{exporting ? 'Exporting…' : 'Export'}</span>
+              </Button>
+              {exportMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} />
+                  <div className="absolute right-0 mt-1 z-20 w-60 rounded-xl border border-border bg-surface shadow-lg p-2">
+                    <p className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wide">Download applicants</p>
+                    {EXPORT_STATUSES.map(s => (
+                      <div key={s.value} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-raised">
+                        <span className="text-xs">{s.label}</span>
+                        <div className="flex gap-1">
+                          <button onClick={() => runExport(s.value, 'xlsx')} className="text-[10px] font-semibold text-primary border border-primary/30 rounded px-1.5 py-0.5 hover:bg-primary/10">Excel</button>
+                          <button onClick={() => runExport(s.value, 'docx')} className="text-[10px] font-semibold text-primary border border-primary/30 rounded px-1.5 py-0.5 hover:bg-primary/10">Word</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         }
       />
@@ -351,6 +425,7 @@ export default function CandidatesPage() {
               app={selectedApp}
               onStatusChange={(status) => {
                 if (status === 'interview_scheduled') { setScheduleApp(selectedApp); return; }
+                if (LETTER_STATUSES.includes(status)) { setLetterAction({ app: selectedApp, status }); return; }
                 updateStatus.mutate({ appId: selectedApp.id, status });
                 setSelectedApp({ ...selectedApp, status: status as import('@/types').ApplicationStatus });
               }}
@@ -380,6 +455,30 @@ export default function CandidatesPage() {
               setSelectedApp({ ...selectedApp, status: 'interview_scheduled' as import('@/types').ApplicationStatus });
             }
             setScheduleApp(null);
+          }}
+        />
+      )}
+
+      {/* Decision-letter composer for shortlist / reject / offer / hire. */}
+      {letterAction && (
+        <LetterComposerModal
+          open
+          app={letterAction.app}
+          status={letterAction.status}
+          jobTitle={job?.title ?? (letterAction.app as any).job?.title ?? 'this role'}
+          companyName={job?.company ?? (job as any)?.employer?.companyName ?? 'our company'}
+          applicantName={
+            letterAction.app.applicant
+              ? `${letterAction.app.applicant.firstName ?? ''} ${letterAction.app.applicant.lastName ?? ''}`.trim() || 'Applicant'
+              : 'Applicant'
+          }
+          onClose={() => setLetterAction(null)}
+          onSent={() => {
+            qc.invalidateQueries({ queryKey: ['job-applications', jobId] });
+            if (selectedApp?.id === letterAction.app.id) {
+              setSelectedApp({ ...selectedApp, status: letterAction.status as import('@/types').ApplicationStatus });
+            }
+            setLetterAction(null);
           }}
         />
       )}
@@ -906,6 +1005,138 @@ function ScheduleInterviewModal({ open, onClose, app, applicantName, onScheduled
             {schedule.isPending && <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />}
             <Calendar className="h-3.5 w-3.5 mr-2" /> Schedule
           </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Decision-letter composer ─────────────────────────────────────────────────
+
+const LETTER_TITLES: Record<string, string> = {
+  shortlisted: 'Shortlist letter',
+  rejected: 'Rejection letter',
+  offer_extended: 'Offer letter',
+  hired: 'Welcome / hire letter',
+};
+
+const LETTER_ACTION_LABEL: Record<string, string> = {
+  shortlisted: 'Shortlist & send',
+  rejected: 'Reject & send',
+  offer_extended: 'Send offer',
+  hired: 'Hire & send',
+};
+
+function fillPreview(text: string, vars: { candidateName: string; jobTitle: string; companyName: string }): string {
+  return (text || '')
+    .replace(/\{\{\s*candidateName\s*\}\}/g, vars.candidateName)
+    .replace(/\{\{\s*jobTitle\s*\}\}/g, vars.jobTitle)
+    .replace(/\{\{\s*companyName\s*\}\}/g, vars.companyName);
+}
+
+function LetterComposerModal({ open, app, status, applicantName, jobTitle, companyName, onClose, onSent }: {
+  open: boolean;
+  app: Application;
+  status: string;
+  applicantName: string;
+  jobTitle: string;
+  companyName: string;
+  onClose: () => void;
+  onSent: () => void;
+}) {
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [loadingTpl, setLoadingTpl] = useState(true);
+
+  // Load the employer's saved letter (or the system default) for this action.
+  useEffect(() => {
+    let alive = true;
+    setLoadingTpl(true);
+    jobsApi.getLetterTemplate(status)
+      .then(r => {
+        if (!alive) return;
+        const tpl = r.data?.data ?? r.data ?? {};
+        setSubject(tpl.subject ?? '');
+        setBody(tpl.body ?? '');
+      })
+      .catch(() => { /* keep empty; server still has a default */ })
+      .finally(() => alive && setLoadingTpl(false));
+    return () => { alive = false; };
+  }, [status]);
+
+  const vars = { candidateName: applicantName.split(' ')[0] || applicantName, jobTitle, companyName };
+
+  const send = useMutation({
+    mutationFn: () => jobsApi.updateApplicationStatus(app.id, status, undefined, {
+      letter: { subject, body },
+      saveAsDefault,
+    }),
+    onSuccess: () => {
+      toast.success('Letter sent to the candidate');
+      onSent();
+    },
+    onError: () => toast.error('Could not send the letter'),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-primary" /> {LETTER_TITLES[status] ?? 'Letter'}
+          </DialogTitle>
+          <p className="text-xs text-muted-foreground">to {applicantName} · {jobTitle}</p>
+        </DialogHeader>
+
+        <DialogBody className="space-y-3">
+          {loadingTpl ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading letter…
+            </div>
+          ) : showPreview ? (
+            <div className="rounded-lg border border-border bg-surface-raised p-4">
+              <p className="text-xs font-semibold mb-1">{fillPreview(subject, vars)}</p>
+              <p className="text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground">{fillPreview(body, vars)}</p>
+            </div>
+          ) : (
+            <>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">Subject</p>
+                <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Email subject" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">Letter</p>
+                  <span className="text-[10px] text-muted-foreground">Placeholders: {'{{candidateName}}'}, {'{{jobTitle}}'}, {'{{companyName}}'}</span>
+                </div>
+                <textarea
+                  value={body}
+                  onChange={e => setBody(e.target.value)}
+                  rows={11}
+                  className="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/50 leading-relaxed"
+                />
+              </div>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                <input type="checkbox" checked={saveAsDefault} onChange={e => setSaveAsDefault(e.target.checked)} className="rounded border-border" />
+                Save this as my default {LETTER_TITLES[status]?.toLowerCase() ?? 'letter'}
+              </label>
+            </>
+          )}
+        </DialogBody>
+
+        <DialogFooter className="flex items-center justify-between">
+          <Button variant="ghost" size="sm" type="button" onClick={() => setShowPreview(p => !p)} disabled={loadingTpl}>
+            {showPreview ? 'Edit' : 'Preview'}
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" type="button" onClick={onClose}>Cancel</Button>
+            <Button onClick={() => send.mutate()} disabled={send.isPending || loadingTpl || !subject.trim() || !body.trim()}>
+              {send.isPending && <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />}
+              <Send className="h-3.5 w-3.5 mr-2" /> {LETTER_ACTION_LABEL[status] ?? 'Send'}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
