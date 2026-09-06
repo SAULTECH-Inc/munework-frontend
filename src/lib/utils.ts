@@ -67,16 +67,18 @@ export function getInitials(name: string) {
     .toUpperCase();
 }
 
-export function getMatchScoreBadge(rawScore?: number | null, seedId?: string) {
-  let score: number;
-  if (rawScore != null) {
-    score = rawScore <= 1 && rawScore > 0 ? Math.round(rawScore * 100) : Math.round(rawScore);
-  } else if (seedId) {
-    const hash = seedId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    score = 40 + (hash % 58); // spread across all 5 tiers
-  } else {
-    score = 75;
-  }
+/**
+ * Badge for a real match score, or null when there is none.
+ *
+ * This used to fabricate a score by hashing the job id (and fall back to a
+ * constant 75) when no real score was present — so applicants saw convincing
+ * "% Match" numbers that had nothing to do with their profile. A made-up match
+ * score is worse than none, because people trust it. Now it returns null and
+ * callers render nothing.
+ */
+export function getMatchScoreBadge(rawScore?: number | null) {
+  if (rawScore == null) return null;
+  const score = rawScore <= 1 && rawScore > 0 ? Math.round(rawScore * 100) : Math.round(rawScore);
 
   let style = '';
   let labelText = '';

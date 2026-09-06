@@ -31,7 +31,7 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
 
   const companyRaw = job.employer?.companyName || job.company || 'Company';
   const cleanCompanyName = companyRaw.replace(/^[\$\s\W]+/, '').trim() || 'Company';
-  const matchInfo = getMatchScoreBadge(job.aiMatchScore ?? job.matchScore, job.id);
+  const matchInfo = getMatchScoreBadge(job.aiMatchScore ?? job.matchScore);
 
   return (
     <Dialog open={true} onOpenChange={v => { if (!v) onClose(); }}>
@@ -53,9 +53,11 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
                   <h2 className="text-xl font-bold font-['Outfit',sans-serif] text-foreground truncate">
                     {job.title}
                   </h2>
-                  <span className={cn('text-xs font-bold rounded-full px-2.5 py-0.5 flex items-center gap-1 border shrink-0', matchInfo.style)}>
-                    <Sparkles className="h-3 w-3" /> {matchInfo.score}% Match
-                  </span>
+                  {matchInfo && (
+                    <span className={cn('text-xs font-bold rounded-full px-2.5 py-0.5 flex items-center gap-1 border shrink-0', matchInfo.style)}>
+                      <Sparkles className="h-3 w-3" /> {matchInfo.score}% Match
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-semibold text-primary flex items-center gap-1">

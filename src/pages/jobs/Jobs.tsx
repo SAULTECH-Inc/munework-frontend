@@ -549,14 +549,15 @@ export function JobCard({ job, selected, compact, showMatchScore, onSelect, onAp
         {/* Top Right Action & Score */}
         <div className="flex items-center gap-2 shrink-0">
           {(() => {
-            const { score, style, labelText } = getMatchScoreBadge(job.aiMatchScore ?? job.matchScore, job.id);
+            const badge = getMatchScoreBadge(job.aiMatchScore ?? job.matchScore);
+            if (!badge) return null;
             return (
               <span
-                className={cn('text-[11px] font-bold rounded-full px-3 py-1 flex items-center gap-1.5 border shadow-sm transition-all', style)}
-                title={`${labelText} — ${score}% AI Match`}
+                className={cn('text-[11px] font-bold rounded-full px-3 py-1 flex items-center gap-1.5 border shadow-sm transition-all', badge.style)}
+                title={`${badge.labelText} — ${badge.score}% match`}
               >
                 <Sparkles className="h-3 w-3" />
-                {score}% Match
+                {badge.score}% Match
               </span>
             );
           })()}

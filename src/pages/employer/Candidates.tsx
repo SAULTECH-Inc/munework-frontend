@@ -335,10 +335,11 @@ function CandidateRow({ app, selected, compact, onSelect, onStatusChange }: Cand
           {!compact && <p className="text-[11px] text-muted-foreground truncate">{app.applicant?.email}</p>}
         </div>
         {(() => {
-          const { score, style } = getMatchScoreBadge(app.aiMatchScore);
+          const badge = getMatchScoreBadge(app.aiMatchScore);
+          if (!badge) return null;
           return (
-            <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-sm shrink-0', style)}>
-              {score}% Match
+            <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-sm shrink-0', badge.style)}>
+              {badge.score}% Match
             </span>
           );
         })()}
@@ -408,15 +409,16 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
           {app.applicant?.location && <p className="text-xs text-muted-foreground mt-0.5">{app.applicant.location}</p>}
         </div>
         {(() => {
-          const { score, style, labelText } = getMatchScoreBadge(app.aiMatchScore);
+          const badge = getMatchScoreBadge(app.aiMatchScore);
+          if (!badge) return null;
           return (
             <button
               onClick={() => setShowMatchDetails(true)}
-              className={cn('text-center px-3.5 py-2 rounded-2xl border shadow-sm shrink-0 transition-transform hover:scale-105 cursor-pointer', style)}
-              title="Click to view full AI Match Breakdown"
+              className={cn('text-center px-3.5 py-2 rounded-2xl border shadow-sm shrink-0 transition-transform hover:scale-105 cursor-pointer', badge.style)}
+              title="Click to view full match breakdown"
             >
-              <p className="text-xl font-extrabold font-['Outfit',sans-serif] leading-tight">{score}%</p>
-              <p className="text-[10px] font-semibold opacity-90">{labelText}</p>
+              <p className="text-xl font-extrabold font-['Outfit',sans-serif] leading-tight">{badge.score}%</p>
+              <p className="text-[10px] font-semibold opacity-90">{badge.labelText}</p>
               <span className="text-[9px] underline block mt-0.5 opacity-80">View Details</span>
             </button>
           );
