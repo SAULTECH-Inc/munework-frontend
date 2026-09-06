@@ -134,18 +134,20 @@ export default function SignupPage() {
       <p className="text-center text-sm text-muted-foreground -mt-3">Create your account to get started</p>
 
       <div className="glass rounded-2xl border border-border/60 p-7 space-y-5 shadow-[0_8px_40px_rgba(0,0,0,0.25)]">
-        {/* Social auth */}
+        {/* Social auth — carry the chosen account type as `state`. Without it
+            the backend defaults every social signup to applicant, so picking
+            "Employer" and signing up with Google silently made an applicant. */}
         <div className="grid grid-cols-3 gap-2">
           <Button variant="outline" type="button" size="sm" className="gap-1.5 text-xs font-medium"
-            onClick={() => { window.location.href = `${oauthBase}/auth/google`; }}>
+            onClick={() => { window.location.href = `${oauthBase}/auth/google?state=${userType}`; }}>
             <GoogleIcon /> Google
           </Button>
           <Button variant="outline" type="button" size="sm" className="gap-1.5 text-xs font-medium"
-            onClick={() => { window.location.href = `${oauthBase}/auth/linkedin`; }}>
+            onClick={() => { window.location.href = `${oauthBase}/auth/linkedin?state=${userType}`; }}>
             <LinkedInIcon /> LinkedIn
           </Button>
           <Button variant="outline" type="button" size="sm" className="gap-1.5 text-xs font-medium"
-            onClick={() => { window.location.href = `${oauthBase}/auth/microsoft`; }}>
+            onClick={() => { window.location.href = `${oauthBase}/auth/microsoft?state=${userType}`; }}>
             <MicrosoftIcon /> Microsoft
           </Button>
         </div>
