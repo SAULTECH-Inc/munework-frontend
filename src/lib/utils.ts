@@ -147,11 +147,13 @@ export const LEVEL_LABEL: Record<string, string> = {
 
 export const APPLICATION_STATUS_LABEL: Record<string, string> = {
   pending: 'Pending',
+  viewed: 'Viewed',
   under_review: 'Under Review',
   shortlisted: 'Shortlisted',
   interview_scheduled: 'Interview Scheduled',
   offer_extended: 'Offer Extended',
   offer_accepted: 'Offer Accepted',
+  offer_declined: 'Offer Declined',
   hired: 'Hired',
   rejected: 'Rejected',
   withdrawn: 'Withdrawn',
@@ -159,11 +161,13 @@ export const APPLICATION_STATUS_LABEL: Record<string, string> = {
 
 export const APPLICATION_STATUS_COLOR: Record<string, string> = {
   pending: 'bg-warning/10 text-warning border-warning/20',
+  viewed: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
   under_review: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   shortlisted: 'bg-primary/10 text-primary border-primary/20',
   interview_scheduled: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   offer_extended: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   offer_accepted: 'bg-success/10 text-success border-success/20',
+  offer_declined: 'bg-destructive/10 text-destructive border-destructive/20',
   hired: 'bg-success/10 text-success border-success/20',
   rejected: 'bg-destructive/10 text-destructive border-destructive/20',
   withdrawn: 'bg-muted/20 text-muted-foreground border-border',

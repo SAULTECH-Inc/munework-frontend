@@ -147,6 +147,7 @@ export default function LoginPage() {
   const [loginError, setLoginError]             = useState('');
   const [pendingEmail, setPendingEmail]         = useState('');
   const [pendingTempToken, setPendingTempToken] = useState('');
+  const [pendingRememberMe, setPendingRememberMe] = useState(false);
 
   const [otpDigits, setOtpDigits]               = useState<string[]>(Array(6).fill(''));
   const [otpLoading, setOtpLoading]             = useState(false);
@@ -200,6 +201,7 @@ export default function LoginPage() {
       if (payload.requiresTwoFactor) {
         setPendingEmail(data.email);
         setPendingTempToken(payload.tempToken ?? '');
+        setPendingRememberMe(!!data.rememberMe);
         setOtpDigits(Array(6).fill(''));
         setStep('2fa');
         return;
@@ -236,7 +238,7 @@ export default function LoginPage() {
       const res = await authApi.verify2FA({
         code,
         tempToken: pendingTempToken,
-        rememberMe: false,
+        rememberMe: pendingRememberMe,
       });
       const payload = res.data.data ?? res.data;
       const token: string | undefined = payload.accessToken;

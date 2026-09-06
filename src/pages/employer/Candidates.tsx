@@ -18,9 +18,34 @@ import { cn, APPLICATION_STATUS_COLOR, APPLICATION_STATUS_LABEL, timeAgo, getIni
 import type { Application } from '@/types';
 import toast from 'react-hot-toast';
 
-const ALL_STATUSES = [
+// Statuses an employer can move a candidate to. `viewed` is omitted because it
+// is set automatically the first time the employer opens the application;
+// `interview_scheduled` stays in the list but selecting it opens the scheduling
+// modal rather than flipping the status directly (the backend rejects a bare
+// set of that status).
+const SETTABLE_STATUSES = [
   'pending', 'under_review', 'shortlisted', 'interview_scheduled',
   'offer_extended', 'offer_accepted', 'offer_declined', 'hired', 'rejected',
+];
+
+// Always render the application's current status as an option even if it isn't
+// employer-settable (e.g. `viewed`, `withdrawn`) — otherwise the <select> shows
+// a blank value for those states.
+function statusOptions(current?: string): string[] {
+  return current && !SETTABLE_STATUSES.includes(current)
+    ? [current, ...SETTABLE_STATUSES]
+    : SETTABLE_STATUSES;
+}
+
+// Statuses the employer can't set by hand — shown (as the current value) but
+// disabled in the dropdown.
+const NON_SETTABLE = new Set(['viewed', 'withdrawn']);
+
+// Every status a candidate can be in, for the filter dropdown (includes the
+// auto/terminal ones an employer can't set but can filter by).
+const FILTER_STATUSES = [
+  'pending', 'viewed', 'under_review', 'shortlisted', 'interview_scheduled',
+  'offer_extended', 'offer_accepted', 'offer_declined', 'hired', 'rejected', 'withdrawn',
 ];
 
 const INTERVIEW_TYPES = [
@@ -42,6 +67,7 @@ export default function CandidatesPage() {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [scheduleApp, setScheduleApp] = useState<Application | null>(null);
   const qc = useQueryClient();
 
   // When no jobId in URL, fetch job list so user can pick one
@@ -101,6 +127,14 @@ export default function CandidatesPage() {
     },
     onError: () => toast.error('Failed to update status'),
   });
+
+  // Selecting "Interview Scheduled" must go through the scheduling modal — the
+  // backend refuses a bare status change to it, since the applicant needs the
+  // actual date/time/link. Everything else is a direct status update.
+  const handleStatusChange = (app: Application, status: string) => {
+    if (status === 'interview_scheduled') { setScheduleApp(app); return; }
+    updateStatus.mutate({ appId: app.id, status });
+  };
 
   const rawApps: Application[] = (data as any)?.data ?? data ?? [];
 
@@ -262,7 +296,7 @@ export default function CandidatesPage() {
                 className="flex-1 text-xs bg-transparent outline-none text-muted-foreground border border-border rounded-lg px-2 py-1"
               >
                 <option value="">All statuses</option>
-                {ALL_STATUSES.map(s => (
+                {FILTER_STATUSES.map(s => (
                   <option key={s} value={s}>{APPLICATION_STATUS_LABEL[s]}</option>
                 ))}
               </select>
@@ -302,7 +336,7 @@ export default function CandidatesPage() {
                     selected={selectedApp?.id === app.id}
                     compact={!!selectedApp}
                     onSelect={() => setSelectedApp(selectedApp?.id === app.id ? null : app)}
-                    onStatusChange={(status) => updateStatus.mutate({ appId: app.id, status })}
+                    onStatusChange={(status) => handleStatusChange(app, status)}
                   />
                 ))}
               </div>
@@ -316,14 +350,39 @@ export default function CandidatesPage() {
             <CandidateDetail
               app={selectedApp}
               onStatusChange={(status) => {
+                if (status === 'interview_scheduled') { setScheduleApp(selectedApp); return; }
                 updateStatus.mutate({ appId: selectedApp.id, status });
                 setSelectedApp({ ...selectedApp, status: status as import('@/types').ApplicationStatus });
               }}
+              onSchedule={() => setScheduleApp(selectedApp)}
               onClose={() => setSelectedApp(null)}
             />
           </div>
         )}
       </div>
+
+      {/* Interview scheduling — reached from either status dropdown or the
+          detail panel's Schedule button. scheduleInterview() sets the status
+          to interview_scheduled itself, so we only refetch on success. */}
+      {scheduleApp && (
+        <ScheduleInterviewModal
+          open
+          onClose={() => setScheduleApp(null)}
+          app={scheduleApp}
+          applicantName={
+            scheduleApp.applicant
+              ? `${scheduleApp.applicant.firstName ?? ''} ${scheduleApp.applicant.lastName ?? ''}`.trim() || 'Applicant'
+              : 'Applicant'
+          }
+          onScheduled={() => {
+            qc.invalidateQueries({ queryKey: ['job-applications', jobId] });
+            if (selectedApp?.id === scheduleApp.id) {
+              setSelectedApp({ ...selectedApp, status: 'interview_scheduled' as import('@/types').ApplicationStatus });
+            }
+            setScheduleApp(null);
+          }}
+        />
+      )}
     </>
   );
 }
@@ -379,8 +438,8 @@ function CandidateRow({ app, selected, compact, onSelect, onStatusChange }: Cand
             onChange={e => { e.stopPropagation(); onStatusChange(e.target.value); }}
             className="text-[10px] bg-transparent border border-border rounded-lg px-1.5 py-0.5 outline-none cursor-pointer"
           >
-            {ALL_STATUSES.map(s => (
-              <option key={s} value={s}>{APPLICATION_STATUS_LABEL[s]}</option>
+            {statusOptions(app.status).map(s => (
+              <option key={s} value={s} disabled={NON_SETTABLE.has(s)}>{APPLICATION_STATUS_LABEL[s]}</option>
             ))}
           </select>
         </div>
@@ -393,13 +452,13 @@ function CandidateRow({ app, selected, compact, onSelect, onStatusChange }: Cand
 
 type DetailTab = 'overview' | 'cover' | 'experience' | 'screening';
 
-function CandidateDetail({ app, onStatusChange, onClose }: {
+function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
   app: Application;
   onStatusChange: (s: string) => void;
+  onSchedule: () => void;
   onClose: () => void;
 }) {
   const [showMessage, setShowMessage] = useState(false);
-  const [showSchedule, setShowSchedule] = useState(false);
   const [showMatchDetails, setShowMatchDetails] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
 
@@ -493,8 +552,8 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
           onChange={e => onStatusChange(e.target.value)}
           className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-sm outline-none focus:ring-1 focus:ring-primary/50"
         >
-          {ALL_STATUSES.map(s => (
-            <option key={s} value={s}>{APPLICATION_STATUS_LABEL[s]}</option>
+          {statusOptions(app.status).map(s => (
+            <option key={s} value={s} disabled={NON_SETTABLE.has(s)}>{APPLICATION_STATUS_LABEL[s]}</option>
           ))}
         </select>
       </div>
@@ -632,7 +691,7 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
         <Button
           size="sm"
           className="flex-1 text-xs gap-1.5"
-          onClick={() => setShowSchedule(true)}
+          onClick={onSchedule}
         >
           <Calendar className="h-3.5 w-3.5" /> Schedule Interview
         </Button>
@@ -644,13 +703,6 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
         onClose={() => setShowMessage(false)}
         app={app}
         applicantName={applicantName}
-      />
-      <ScheduleInterviewModal
-        open={showSchedule}
-        onClose={() => setShowSchedule(false)}
-        app={app}
-        applicantName={applicantName}
-        onScheduled={() => onStatusChange('interview_scheduled')}
       />
       <MatchDetailsModal
         isOpen={showMatchDetails}
@@ -732,6 +784,7 @@ function ScheduleInterviewModal({ open, onClose, app, applicantName, onScheduled
   const [interviewTime, setInterviewTime] = useState('');
   const [interviewType, setInterviewType] = useState<'video' | 'phone' | 'in_person'>('video');
   const [meetingLink, setMeetingLink] = useState('');
+  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
 
   const schedule = useMutation({
@@ -739,7 +792,8 @@ function ScheduleInterviewModal({ open, onClose, app, applicantName, onScheduled
       date: interviewDate?.toISOString().slice(0, 10),
       time: interviewTime,
       type: interviewType,
-      meetingLink: meetingLink || undefined,
+      meetingLink: interviewType === 'video' ? (meetingLink || undefined) : undefined,
+      location: interviewType === 'in_person' ? (location || undefined) : undefined,
       notes: notes || undefined,
     }),
     onSuccess: () => {
@@ -814,6 +868,18 @@ function ScheduleInterviewModal({ open, onClose, app, applicantName, onScheduled
                 value={meetingLink}
                 onChange={e => setMeetingLink(e.target.value)}
                 placeholder="https://meet.google.com/… or Zoom link"
+              />
+            </div>
+          )}
+
+          {/* Location (for in person) */}
+          {interviewType === 'in_person' && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">Location</p>
+              <Input
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                placeholder="Office address or where to meet"
               />
             </div>
           )}

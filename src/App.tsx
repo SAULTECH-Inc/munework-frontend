@@ -124,6 +124,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<SmartDashboard />} />
             <Route path="/applications" element={<SmartApplications />} />
+            <Route path="/applications/:id" element={<SmartApplications />} />
             <Route path="/resume" element={<ResumePage />} />
             <Route path="/employer/jobs" element={<EmployerJobsPage />} />
             <Route path="/employer/jobs/:jobId/candidates" element={<CandidatesPage />} />

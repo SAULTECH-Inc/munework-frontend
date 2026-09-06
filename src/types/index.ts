@@ -8,6 +8,7 @@ export type JobLevel = 'intern' | 'junior' | 'mid' | 'senior' | 'lead' | 'manage
 export type JobStatus = 'draft' | 'posted' | 'active' | 'paused' | 'closed' | 'expired' | 'archived';
 export type ApplicationStatus =
   | 'pending'
+  | 'viewed'
   | 'under_review'
   | 'shortlisted'
   | 'interview_scheduled'

@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search, X, SortAsc, SortDesc, Briefcase, Building2,
@@ -24,6 +25,7 @@ import { useAuthStore } from '@/store/auth.store';
 const STATUS_FILTERS = [
   { label: 'All',                 value: null              },
   { label: 'Pending',             value: 'pending'         },
+  { label: 'Viewed',              value: 'viewed'          },
   { label: 'Under Review',        value: 'under_review'    },
   { label: 'Shortlisted',         value: 'shortlisted'     },
   { label: 'Interview',           value: 'interview_scheduled' },
@@ -41,6 +43,7 @@ const SORT_OPTIONS = [
 
 const KANBAN_COLUMNS = [
   { key: 'pending',              label: 'Pending'      },
+  { key: 'viewed',               label: 'Viewed'       },
   { key: 'under_review',         label: 'Under Review' },
   { key: 'shortlisted',          label: 'Shortlisted'  },
   { key: 'interview_scheduled',  label: 'Interview'    },
@@ -69,6 +72,18 @@ export default function ApplicationsPage() {
   });
 
   const all: Application[] = (data as any)?.data ?? data ?? [];
+
+  // Deep link from an email/notification (/applications/:id) — open that
+  // application's detail as soon as the list has loaded. Guarded so it fires
+  // once per id: without this, every background refetch (which yields a fresh
+  // `all` array) would re-open a detail the user had just closed.
+  const { id: deepLinkId } = useParams<{ id?: string }>();
+  const openedDeepLink = useRef<string | null>(null);
+  useEffect(() => {
+    if (!deepLinkId || !all.length || openedDeepLink.current === deepLinkId) return;
+    const match = all.find(a => a.id === deepLinkId);
+    if (match) { setSelected(match); openedDeepLink.current = deepLinkId; }
+  }, [deepLinkId, all]);
 
   // Client-side filter + sort (server returns up to 200)
   const applications = useMemo(() => {
@@ -395,7 +410,7 @@ function AppDetailPanel({ app, onClose, onWithdraw, withdrawPending, inline = fa
 }) {
   const [tab, setTab] = useState<'overview' | 'cover' | 'screening'>('overview');
   const a = app as any;
-  const canWithdraw = ['pending', 'under_review'].includes(app.status);
+  const canWithdraw = ['pending', 'viewed', 'under_review'].includes(app.status);
 
   return (
     <>
