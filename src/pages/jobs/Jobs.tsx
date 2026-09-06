@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search, SlidersHorizontal, MapPin, Clock, Bookmark, BookmarkCheck, Zap, X, Sparkles,
   TrendingUp, ChevronDown, ChevronUp, Building2, AlertCircle, DollarSign, Filter, Grid, List,
@@ -55,7 +55,6 @@ export default function JobsPage() {
   const [filtersOpen, setFiltersOpen]   = useState(false);
   const [selectedJob, setSelectedJob]   = useState<Job | null>(null);
   const [applyJob, setApplyJob]         = useState<Job | null>(null);
-  const [page, setPage]                 = useState(1);
 
   const effectiveLocation = city ? `${city}${country ? `, ${country}` : ''}` : country || location;
 
@@ -63,20 +62,32 @@ export default function JobsPage() {
   // rather than assumed.
   const isApplicant = useAuthStore(st => st.user?.userType === 'applicant');
 
-  const params: Record<string, string> = { limit: '20', page: String(page) };
-  if (search) params.q = search;
-  if (effectiveLocation) params.location = effectiveLocation;
-  if (jobType) params.jobType = jobType;
-  if (workMode) params.workMode = workMode;
-  if (experience) params.experienceLevel = experience;
-  if (salaryMin) params.salaryMin = salaryMin;
-  if (salaryMax) params.salaryMax = salaryMax;
-  if (salaryMin || salaryMax) { params.currency = currency; params.salaryFrequency = salaryFreq; }
+  // Filter params (without page) — the query key. Changing any filter refetches
+  // from page 1 automatically.
+  const filterParams: Record<string, string> = {};
+  if (search) filterParams.q = search;
+  if (effectiveLocation) filterParams.location = effectiveLocation;
+  if (jobType) filterParams.jobType = jobType;
+  if (workMode) filterParams.workMode = workMode;
+  if (experience) filterParams.experienceLevel = experience;
+  if (salaryMin) filterParams.salaryMin = salaryMin;
+  if (salaryMax) filterParams.salaryMax = salaryMax;
+  if (salaryMin || salaryMax) { filterParams.currency = currency; filterParams.salaryFrequency = salaryFreq; }
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['jobs', params],
-    queryFn: () => jobsApi.search(params).then(r => r.data.data ?? r.data),
-    placeholderData: (prev: any) => prev,
+  const PAGE_SIZE = 20;
+  const {
+    data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['jobs', filterParams],
+    queryFn: ({ pageParam }) =>
+      jobsApi.search({ ...filterParams, limit: String(PAGE_SIZE), page: String(pageParam) })
+        .then(r => r.data.data ?? r.data),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any, allPages: any[]) => {
+      const total = lastPage?.total ?? 0;
+      const loaded = allPages.reduce((n, p) => n + ((p?.data ?? p ?? []).length), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
+    },
     enabled: activeTab === 'all',
   });
 
@@ -87,13 +98,14 @@ export default function JobsPage() {
     enabled: activeTab === 'recommended' && isApplicant,
   });
 
-  const allJobs: Job[] = (data as any)?.data ?? data ?? [];
+  // Flatten every loaded page into one list.
+  const allJobs: Job[] = (data?.pages ?? []).flatMap((p: any) => (p?.data ?? p ?? []) as Job[]);
   const recJobs: Job[] = (recData as any)?.data ?? recData ?? [];
   const jobs = activeTab === 'recommended' ? recJobs : allJobs;
   const isLoadingJobs = activeTab === 'recommended' ? recLoading : isLoading;
 
-  const total = (data as any)?.total ?? allJobs.length;
-  const hasMore = activeTab === 'all' && allJobs.length > 0 && page * 20 < total;
+  const total = (data?.pages?.[0] as any)?.total ?? allJobs.length;
+  const hasMore = activeTab === 'all' && !!hasNextPage;
 
   const toggleBookmark = useMutation({
     mutationFn: (jobId: string) => jobsApi.toggleBookmark(jobId),
@@ -104,7 +116,7 @@ export default function JobsPage() {
     setJobType(''); setWorkMode(''); setExperience('');
     setLocation(''); setCountry(''); setCity('');
     setSalaryMin(''); setSalaryMax(''); setCurrency('USD'); setSalaryFreq('yearly');
-    setQuerySearch(''); setPage(1);
+    setQuerySearch('');
   }
 
   const hasFilters = !!(jobType || workMode || experience || effectiveLocation || search || salaryMin || salaryMax);
@@ -409,10 +421,10 @@ export default function JobsPage() {
                 <Button
                   variant="outline"
                   className="w-full py-6 text-xs font-semibold rounded-2xl border-border/60"
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={isLoading}
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
                 >
-                  Load more openings
+                  {isFetchingNextPage ? 'Loading…' : `Load more openings (${total - allJobs.length} more)`}
                 </Button>
               )}
             </div>
