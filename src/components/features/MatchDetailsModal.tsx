@@ -164,7 +164,7 @@ export function MatchDetailsModal({
                       {formatPercentage(matchData.breakdown.component_scores.experience)}
                     </p>
                     <p className="text-[11px] font-medium opacity-80 capitalize">
-                      {matchData.breakdown.detailed_analysis?.experience?.status ?? 'Evaluated'}
+                      {matchData.breakdown.detailed_analysis?.experience?.evidence ?? matchData.breakdown.detailed_analysis?.experience?.status ?? 'Evaluated'}
                     </p>
                   </div>
 
@@ -181,7 +181,7 @@ export function MatchDetailsModal({
                       {formatPercentage(matchData.breakdown.component_scores.title_intelligence)}
                     </p>
                     <p className="text-[11px] font-medium opacity-80 truncate">
-                      {matchData.breakdown.detailed_analysis?.title?.applicant_title ?? 'Title Similarity'}
+                      {matchData.breakdown.detailed_analysis?.title?.evidence ?? matchData.breakdown.detailed_analysis?.title?.applicant_title ?? 'Title Similarity'}
                     </p>
                   </div>
 
@@ -198,7 +198,7 @@ export function MatchDetailsModal({
                       {formatPercentage(matchData.breakdown.component_scores.location)}
                     </p>
                     <p className="text-[11px] font-medium opacity-80 truncate">
-                      {matchData.breakdown.detailed_analysis?.location?.reason ?? 'Location Compatible'}
+                      {matchData.breakdown.detailed_analysis?.location?.evidence ?? matchData.breakdown.detailed_analysis?.location?.reason ?? 'Location Compatible'}
                     </p>
                   </div>
 
@@ -215,7 +215,7 @@ export function MatchDetailsModal({
                       {formatPercentage(matchData.breakdown.component_scores.education)}
                     </p>
                     <p className="text-[11px] font-medium opacity-80 truncate">
-                      {matchData.breakdown.detailed_analysis?.education?.status ?? 'Degree Qualified'}
+                      {matchData.breakdown.detailed_analysis?.education?.evidence ?? matchData.breakdown.detailed_analysis?.education?.status ?? 'Degree Qualified'}
                     </p>
                   </div>
 
@@ -231,8 +231,8 @@ export function MatchDetailsModal({
                     <p className="text-2xl font-black font-['Outfit',sans-serif]">
                       {formatPercentage(matchData.breakdown.component_scores.requirements_analysis)}
                     </p>
-                    <p className="text-[11px] font-medium opacity-80">
-                      Criteria fulfilled
+                    <p className="text-[11px] font-medium opacity-80 truncate">
+                      {matchData.breakdown.detailed_analysis?.requirements?.evidence ?? 'Criteria fulfilled'}
                     </p>
                   </div>
                 </div>
