@@ -407,8 +407,21 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
     ? `${app.applicant.firstName ?? ''} ${app.applicant.lastName ?? ''}`.trim()
     : 'Applicant';
 
-  const hasCoverLetter = !!app.coverLetter;
-  const hasExperience = (app.applicant?.cv?.parsedData?.experience?.length ?? 0) > 0;
+  // The submitted CV is the richest source; fall back to its parse blob, then
+  // to the applicant's saved profile. Skills may be strings or {skill|name}.
+  const cv: any = (app as any).cv ?? {};
+  const parsed: any = cv.parsedData ?? {};
+  const applicant: any = app.applicant ?? {};
+  const skillName = (s: any) => (typeof s === 'string' ? s : s?.skill ?? s?.name ?? '');
+  const skills: string[] = (cv.skills ?? parsed.skills ?? applicant.skills ?? []).map(skillName).filter(Boolean);
+  const summary: string | undefined = cv.professionalSummary ?? parsed.professionalSummary ?? parsed.summary ?? applicant.professionalSummary;
+  const education: any[] = cv.education ?? parsed.education ?? applicant.education ?? [];
+  const experience: any[] = cv.experience ?? parsed.experience ?? applicant.workExperience ?? [];
+  const cvLink: string | undefined = cv.cvLink ?? applicant.cvLink;
+  const coverLetterLink: string | undefined = (app as any).coverLetterLink ?? cv.coverLetterLink;
+
+  const hasCoverLetter = !!app.coverLetter || !!coverLetterLink;
+  const hasExperience = experience.length > 0;
   const hasScreening = app.screeningAnswers && Object.keys(app.screeningAnswers).length > 0;
 
   const tabs: Array<{ id: DetailTab; label: string; show: boolean }> = [
@@ -432,7 +445,28 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
           {(app.applicant as any)?.professionalTitle && (
             <p className="text-xs text-muted-foreground">{(app.applicant as any).professionalTitle}</p>
           )}
-          {app.applicant?.location && <p className="text-xs text-muted-foreground mt-0.5">{app.applicant.location}</p>}
+          {(applicant.city || applicant.country) && (
+            <p className="text-xs text-muted-foreground mt-0.5">{[applicant.city, applicant.country].filter(Boolean).join(', ')}</p>
+          )}
+          {applicant.phoneNumber && <p className="text-xs text-muted-foreground">{applicant.phoneNumber}</p>}
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {cvLink && (
+              <a href={cvLink} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-primary border border-primary/30 bg-primary/5 rounded-lg px-2 py-1 hover:bg-primary/10">
+                <FileText className="h-3 w-3" /> View CV
+              </a>
+            )}
+            <Link to={`/profile/applicant/${app.applicantId}`} target="_blank"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground border border-border rounded-lg px-2 py-1 hover:text-foreground hover:border-primary/30">
+              <Users className="h-3 w-3" /> Full profile
+            </Link>
+            {applicant.linkedInProfile && (
+              <a href={applicant.linkedInProfile} target="_blank" rel="noreferrer"
+                className="text-[11px] font-medium text-muted-foreground border border-border rounded-lg px-2 py-1 hover:text-foreground hover:border-primary/30">
+                LinkedIn
+              </a>
+            )}
+          </div>
         </div>
         {(() => {
           const badge = getMatchScoreBadge(app.aiMatchScore);
@@ -488,37 +522,38 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
       {/* Tab content */}
       {activeTab === 'overview' && (
         <>
-          {/* Skills */}
-          {app.applicant?.cv?.parsedData?.skills && app.applicant.cv.parsedData.skills.length > 0 && (
+          {/* Summary */}
+          {summary && (
             <div>
-              <p className="text-xs font-semibold mb-2">Skills</p>
+              <p className="text-xs font-semibold mb-2">Summary</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{summary}</p>
+            </div>
+          )}
+
+          {/* Skills */}
+          {skills.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold mb-2">Skills <span className="text-muted-foreground font-normal">({skills.length})</span></p>
               <div className="flex flex-wrap gap-1.5">
-                {app.applicant.cv.parsedData.skills.map(s => (
-                  <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
+                {skills.slice(0, 30).map((s, i) => (
+                  <Badge key={`${s}-${i}`} variant="outline" className="text-xs">{s}</Badge>
                 ))}
+                {skills.length > 30 && <Badge variant="outline" className="text-xs text-muted-foreground">+{skills.length - 30}</Badge>}
               </div>
             </div>
           )}
 
-          {/* Summary */}
-          {app.applicant?.cv?.parsedData?.summary && (
-            <div>
-              <p className="text-xs font-semibold mb-2">Summary</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{app.applicant.cv.parsedData.summary}</p>
-            </div>
-          )}
-
           {/* Education */}
-          {app.applicant?.cv?.parsedData?.education && app.applicant.cv.parsedData.education.length > 0 && (
+          {education.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
                 <p className="text-xs font-semibold">Education</p>
               </div>
               <div className="space-y-2">
-                {app.applicant.cv.parsedData.education.slice(0, 2).map((edu, i) => (
+                {education.slice(0, 3).map((edu: any, i: number) => (
                   <div key={i} className="bg-surface-raised rounded-lg p-3">
-                    <p className="text-xs font-medium">{edu.degree} in {edu.field}</p>
+                    <p className="text-xs font-medium">{[edu.degree, edu.fieldOfStudy ?? edu.field].filter(Boolean).join(' in ')}</p>
                     <p className="text-[11px] text-muted-foreground">{edu.institution}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{edu.startDate} — {edu.endDate || 'Present'}</p>
                   </div>
@@ -540,19 +575,28 @@ function CandidateDetail({ app, onStatusChange, onClose }: {
       {activeTab === 'cover' && (
         <div>
           <p className="text-xs font-semibold mb-2">Cover Letter</p>
-          <div className="bg-surface-raised rounded-lg p-4">
-            <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{app.coverLetter}</p>
-          </div>
+          {app.coverLetter ? (
+            <div className="bg-surface-raised rounded-lg p-4">
+              <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">{app.coverLetter}</p>
+            </div>
+          ) : coverLetterLink ? (
+            <a href={coverLetterLink} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-primary border border-primary/30 bg-primary/5 rounded-lg px-3 py-2 hover:bg-primary/10">
+              <FileText className="h-3.5 w-3.5" /> Open submitted cover letter
+            </a>
+          ) : (
+            <p className="text-xs text-muted-foreground">No cover letter submitted.</p>
+          )}
         </div>
       )}
 
       {activeTab === 'experience' && (
         <div className="space-y-3">
-          {app.applicant?.cv?.parsedData?.experience?.map((exp, i) => (
+          {experience.map((exp: any, i: number) => (
             <div key={i} className="bg-surface-raised rounded-lg p-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-xs font-semibold">{exp.title}</p>
+                  <p className="text-xs font-semibold">{exp.title ?? exp.position}</p>
                   <p className="text-[11px] text-muted-foreground">{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                 </div>
                 <p className="text-[10px] text-muted-foreground shrink-0">{exp.startDate} — {exp.endDate || 'Present'}</p>
