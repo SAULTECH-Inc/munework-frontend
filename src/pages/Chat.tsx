@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import {
   MessageSquare, Send, Loader2, Search, Smile, Paperclip,
-  X, Phone, Video, MoreVertical, Info, Trash2, Check, CheckCheck,
+  X, Phone, Video, MoreVertical, Info, Trash2, Check, CheckCheck, Headphones,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -169,9 +169,21 @@ export default function ChatPage() {
   const activeConv = conversations.find(c => c.id === activeConvId);
   const totalUnread = conversations.reduce((n, c) => n + ((c as any).unreadCount ?? 0), 0);
 
-  const filteredConversations = conversations.filter(c =>
-    !search || c.otherParticipant?.name?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const isSupportConv = (c: Conversation) =>
+    c.type === 'support' || (c as any).otherParticipant?.userType === 'admin';
+
+  const filteredConversations = conversations
+    .filter(c => !search || c.otherParticipant?.name?.toLowerCase().includes(search.toLowerCase()))
+    // Real employer/candidate chats first; the Mune Work Support line sinks to
+    // the bottom so it's never mistaken for a conversation with an employer.
+    .sort((a, b) => {
+      const sa = isSupportConv(a) ? 1 : 0;
+      const sb = isSupportConv(b) ? 1 : 0;
+      if (sa !== sb) return sa - sb;
+      const ta = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+      const tb = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+      return tb - ta;
+    });
 
   const selectConv = useCallback((id: string) => {
     setActiveConvId(id);
@@ -243,6 +255,7 @@ export default function ChatPage() {
               filteredConversations.map(conv => {
                 const isActive = conv.id === activeConvId;
                 const unread = (conv as any).unreadCount ?? 0;
+                const isSupport = isSupportConv(conv);
                 return (
                   <button key={conv.id} onClick={() => selectConv(conv.id)}
                     className={cn(
@@ -252,19 +265,22 @@ export default function ChatPage() {
                     <div className="relative shrink-0">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={conv.otherParticipant?.avatar} />
-                        <AvatarFallback className="text-xs">
-                          {getInitials(conv.otherParticipant?.name ?? '?')}
+                        <AvatarFallback className={cn('text-xs', isSupport && 'bg-primary/15 text-primary')}>
+                          {isSupport ? <Headphones className="h-4 w-4" /> : getInitials(conv.otherParticipant?.name ?? '?')}
                         </AvatarFallback>
                       </Avatar>
-                      {(conv as any).otherParticipant?.isOnline && (
+                      {!isSupport && (conv as any).otherParticipant?.isOnline && (
                         <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-surface" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <p className={cn('text-xs font-medium truncate', isActive ? 'text-primary' : 'text-foreground',
+                        <p className={cn('text-xs font-medium truncate flex items-center gap-1.5', isActive ? 'text-primary' : 'text-foreground',
                           unread > 0 && !isActive && 'font-semibold')}>
-                          {conv.otherParticipant?.name ?? 'Unknown'}
+                          <span className="truncate">{conv.otherParticipant?.name ?? 'Unknown'}</span>
+                          {isSupport && (
+                            <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wide text-primary bg-primary/10 rounded px-1 py-px">Support</span>
+                          )}
                         </p>
                         {conv.lastMessage && (
                           <span className="text-[10px] text-muted-foreground shrink-0">

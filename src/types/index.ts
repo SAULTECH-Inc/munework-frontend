@@ -379,7 +379,7 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  type: 'direct' | 'group';
+  type: 'direct' | 'group' | 'support';
   name?: string;
   lastMessageAt?: string;
   lastMessage?: Message;
