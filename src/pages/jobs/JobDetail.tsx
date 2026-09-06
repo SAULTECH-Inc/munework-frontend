@@ -61,7 +61,12 @@ function Chip({ children, variant = 'default' }: { children: React.ReactNode; va
 }
 
 export default function JobDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  // Reached via /jobs/:slug (JobSlugRoute), so the route param is `slug`, not
+  // `id`. Read both so the page works regardless of which route renders it —
+  // otherwise id is undefined, the query never fires, and every job shows
+  // "not found".
+  const params = useParams<{ slug?: string; id?: string }>();
+  const id = params.id ?? params.slug;
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { user } = useAuthStore();
