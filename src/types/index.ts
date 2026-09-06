@@ -383,8 +383,17 @@ export interface Conversation {
   name?: string;
   lastMessageAt?: string;
   lastMessage?: Message;
+  unreadCount?: number;
   participants?: AuthUser[];
-  otherParticipant?: { id: string; name: string; avatar?: string };
+  otherParticipant?: {
+    id: string;
+    name: string;
+    avatar?: string;
+    professionalTitle?: string;
+    userType?: string;
+    isOnline?: boolean;
+    lastSeen?: string;
+  };
   messages?: Message[];
 }
 
