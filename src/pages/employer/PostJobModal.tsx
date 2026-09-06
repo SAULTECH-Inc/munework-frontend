@@ -71,6 +71,8 @@ const schema = z.object({
   priority: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
   aiAutoScreen: z.boolean().default(false),
   aiMatchThreshold: z.coerce.number().min(0).max(1).default(0.6),
+  applyGateEnabled: z.boolean().default(false),
+  applyThreshold: z.coerce.number().min(0).max(1).default(0.5),
   aiAutoAccept: z.boolean().default(false),
   aiStrictSkillMatch: z.boolean().default(false),
   aiAutoReject: z.boolean().default(false),
@@ -188,6 +190,8 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
       salaryFrequency: 'yearly',
       aiAutoScreen: false,
       aiMatchThreshold: 0.6,
+      applyGateEnabled: false,
+      applyThreshold: 0.5,
       aiAutoAccept: false,
       aiStrictSkillMatch: false,
       aiAutoReject: false,
@@ -221,6 +225,8 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
         priority: (editJob as any).priority ?? undefined,
         aiAutoScreen: editJob.aiSettings?.autoScreen ?? false,
         aiMatchThreshold: editJob.aiSettings?.matchThreshold ?? 0.6,
+        applyGateEnabled: ((editJob.aiSettings as any)?.applyThreshold ?? 0) > 0,
+        applyThreshold: (editJob.aiSettings as any)?.applyThreshold || 0.5,
         aiAutoAccept: (editJob.aiSettings as any)?.autoAccept ?? false,
         aiStrictSkillMatch: (editJob.aiSettings as any)?.strictSkillMatch ?? false,
         aiAutoReject: (editJob.aiSettings as any)?.autoReject ?? false,
@@ -405,6 +411,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
         aiSettings: {
           autoScreen: data.aiAutoScreen,
           matchThreshold: data.aiMatchThreshold,
+          applyThreshold: data.applyGateEnabled ? data.applyThreshold : 0,
           autoAccept: data.aiAutoAccept,
           strictSkillMatch: data.aiStrictSkillMatch,
           criticalSkills: criticalSkills.map(s => s.value),
@@ -844,6 +851,29 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
                       checked={!!watch('aiAutoScreen')}
                       onCheckedChange={v => setValue('aiAutoScreen', v)}
                     />
+                  </div>
+
+                  {/* Minimum match to apply — independent of auto-screening */}
+                  <div className="rounded-lg border border-border bg-surface p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">Require a minimum match to apply</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">Applicants below the score can't apply.</p>
+                      </div>
+                      <Switch checked={watch('applyGateEnabled')} onCheckedChange={v => setValue('applyGateEnabled', v)} />
+                    </div>
+                    {watch('applyGateEnabled') && (
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-[11px] text-muted-foreground">Minimum score to apply</p>
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                            {Math.round(watch('applyThreshold') * 100)}%
+                          </span>
+                        </div>
+                        <input type="range" min="0.3" max="0.95" step="0.05"
+                          {...register('applyThreshold')} className="w-full accent-primary" />
+                      </div>
+                    )}
                   </div>
 
                   {watch('aiAutoScreen') && (

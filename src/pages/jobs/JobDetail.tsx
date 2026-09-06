@@ -83,7 +83,21 @@ export default function JobDetailPage() {
   // External jobs are applied to off-platform: send the applicant to the
   // employer's URL in a new tab instead of opening the in-app application flow.
   const isExternal = !!job?.applicationMethod?.external && !!job?.applicationMethod?.externalUrl;
+
+  // The employer may require a minimum match score to apply. The server also
+  // enforces this; the UI just avoids a pointless attempt and explains why.
+  const applyThreshold: number = (job as any)?.aiSettings?.applyThreshold ?? 0;
+  const myScore: number | undefined = (job as any)?.aiMatchScore ?? undefined;
+  const belowThreshold = applyThreshold > 0 && myScore != null && myScore < applyThreshold;
+
   const startApply = () => {
+    if (belowThreshold) {
+      toast.error(
+        `Your match score (${Math.round((myScore ?? 0) * 100)}%) hasn't reached the ` +
+          `${Math.round(applyThreshold * 100)}% required to apply for this role.`,
+      );
+      return;
+    }
     if (isExternal) {
       window.open(job!.applicationMethod!.externalUrl, '_blank', 'noopener,noreferrer');
       return;
@@ -196,7 +210,7 @@ export default function JobDetailPage() {
             <p className="text-sm font-bold truncate">{job.title}</p>
             <p className="text-xs text-muted-foreground">{job.employer?.companyName}</p>
           </div>
-          <Button size="sm" onClick={startApply} disabled={!isExternal && job.hasApplied} className="shrink-0">
+          <Button size="sm" onClick={startApply} disabled={!isExternal && (job.hasApplied || belowThreshold)} className="shrink-0">
             {isExternal ? <><ExternalLink className="h-3.5 w-3.5 mr-1.5" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Applied</> : 'Apply Now'}
           </Button>
         </div>
@@ -268,7 +282,7 @@ export default function JobDetailPage() {
                 {isApplicant && (
                   <Button
                     onClick={startApply}
-                    disabled={!isExternal && job.hasApplied}
+                    disabled={!isExternal && (job.hasApplied || belowThreshold)}
                     className={cn('gap-2 font-bold px-5', job.hasApplied && 'bg-success/20 text-success border border-success/30 hover:bg-success/20')}
                   >
                     {isExternal ? <><ExternalLink className="h-4 w-4" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-4 w-4" />Applied</> : <><Zap className="h-4 w-4" />Apply Now</>}
@@ -341,7 +355,7 @@ export default function JobDetailPage() {
                     {job.hasApplied ? "You've already applied. We'll keep you updated." : 'Apply in under 2 minutes using your saved CV and cover letter.'}
                   </p>
                 </div>
-                <Button onClick={startApply} disabled={!isExternal && job.hasApplied} size="sm" className="shrink-0">
+                <Button onClick={startApply} disabled={!isExternal && (job.hasApplied || belowThreshold)} size="sm" className="shrink-0">
                   {isExternal ? 'Apply externally' : job.hasApplied ? 'Applied' : 'Apply Now'}
                 </Button>
               </div>
