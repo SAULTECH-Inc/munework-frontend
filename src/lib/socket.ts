@@ -8,8 +8,12 @@ export function connectSockets(token: string) {
 
   const wsBase = import.meta.env.VITE_WS_BASE_URL || import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/v1\/?$/, '') || 'http://localhost:3000';
 
-  // If backend is running on Vercel serverless and no dedicated WebSocket URL is provided, skip socket polling
-  if (wsBase.includes('vercel.app') && !import.meta.env.VITE_WS_BASE_URL) {
+  // Vercel serverless can't hold WebSocket connections, so a socket to a
+  // *.vercel.app host always fails with a console error and never delivers.
+  // Skip it entirely (even if VITE_WS_BASE_URL points there) — chat and
+  // notifications fall back to REST polling. Point VITE_WS_BASE_URL at a
+  // non-serverless realtime host to re-enable live sockets.
+  if (wsBase.includes('vercel.app')) {
     return;
   }
 

@@ -61,6 +61,10 @@ export default function ChatPage() {
     queryKey: ['messages', activeConvId],
     queryFn: () => chatApi.getMessages(activeConvId!).then(r => r.data.data ?? r.data),
     enabled: !!activeConvId,
+    // Real-time sockets don't run on Vercel serverless, so poll the open
+    // conversation for incoming messages instead.
+    refetchInterval: 4_000,
+    refetchOnWindowFocus: true,
   });
 
   const messages: Message[] = Array.isArray(rawMessages)
