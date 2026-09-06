@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   MapPin, Clock, Briefcase, DollarSign, Globe, Bookmark, BookmarkCheck,
@@ -109,6 +109,20 @@ export default function JobDetailPage() {
     }
     setApplyOpen(true);
   };
+
+  // Deep link from the recommendation/apply email (/jobs/:id?apply=1): open the
+  // apply flow automatically once the job has loaded. Runs once, and only for a
+  // job the applicant hasn't already applied to.
+  const [searchParams] = useSearchParams();
+  const autoApplied = useRef(false);
+  useEffect(() => {
+    if (autoApplied.current) return;
+    if (searchParams.get('apply') !== '1') return;
+    if (!job || (job as any).hasApplied) return;
+    autoApplied.current = true;
+    startApply();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [job, searchParams]);
 
   const companyName = job?.company ?? (job?.employer as any)?.companyName ?? '';
 

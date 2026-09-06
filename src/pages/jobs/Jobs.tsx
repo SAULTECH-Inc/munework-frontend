@@ -40,7 +40,11 @@ export default function JobsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const qc = useQueryClient();
 
-  const [activeTab, setActiveTab]       = useState<Tab>('all');
+  // Open the "Matched For You" tab directly from a ?tab=recommended deep link
+  // (e.g. the "View all matches" button in the recommendation email).
+  const [activeTab, setActiveTab]       = useState<Tab>(
+    searchParams.get('tab') === 'recommended' ? 'recommended' : 'all',
+  );
   const [search, setQuerySearch]        = useState(searchParams.get('q') ?? '');
   const [location, setLocation]         = useState(searchParams.get('location') ?? '');
   const [country, setCountry]           = useState('');
