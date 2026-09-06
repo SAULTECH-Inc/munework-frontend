@@ -34,6 +34,7 @@ interface ScreeningQuestion {
   question: string;
   type: QuestionType;
   required: boolean;
+  isKnockout: boolean;
   options: string[];
   expectedAnswer: string | string[];
   aiWeight: number;
@@ -139,6 +140,7 @@ function newQuestion(): ScreeningQuestion {
     question: '',
     type: 'short_text',
     required: true,
+    isKnockout: false,
     options: [],
     expectedAnswer: '',
     aiWeight: 5,
@@ -239,6 +241,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
         question: q.question,
         type: q.type ?? 'short_text',
         required: q.required ?? true,
+        isKnockout: q.isKnockout ?? false,
         options: q.options ?? [],
         expectedAnswer: q.expectedAnswer ?? '',
         aiWeight: q.aiWeight ?? 5,
@@ -415,6 +418,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
           question: q.question,
           type: q.type,
           required: q.required,
+          isKnockout: q.isKnockout,
           options: q.options.filter(Boolean),
           expectedAnswer: q.expectedAnswer,
           aiWeight: q.aiWeight,
@@ -1084,6 +1088,16 @@ function ScreeningQuestionCard({
               size={15}
             />
             <span className="text-xs text-foreground">Required</span>
+          </label>
+        </div>
+        <div className="flex items-end pb-1">
+          <label className="flex items-center gap-2 cursor-pointer" title="A wrong answer auto-rejects the applicant regardless of match score">
+            <Checkbox
+              checked={question.isKnockout}
+              onChange={checked => onUpdate({ isKnockout: checked })}
+              size={15}
+            />
+            <span className="text-xs text-foreground">Knockout</span>
           </label>
         </div>
       </div>

@@ -216,6 +216,8 @@ export interface ScreeningQuestion {
   type: 'short_text' | 'long_text' | 'yes_no' | 'single_choice' | 'multiple_choice';
   options?: string[];
   isRequired: boolean;
+  expectedAnswer?: string | string[];
+  isKnockout?: boolean;
 }
 
 export interface AiSettings {
