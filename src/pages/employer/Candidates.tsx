@@ -127,37 +127,54 @@ export default function CandidatesPage() {
     return (
       <>
         <TopBar title="Candidates" />
-        <div className="p-6 max-w-2xl mx-auto">
-          <p className="text-sm text-muted-foreground mb-4">Select a job to view its candidates.</p>
+        <div className="p-6 max-w-6xl mx-auto w-full">
+          <div className="flex items-baseline justify-between mb-4">
+            <p className="text-sm text-muted-foreground">Select a job to view its candidates.</p>
+            {!allJobsLoading && allJobs.length > 0 && (
+              <span className="text-xs text-muted-foreground">{allJobs.length} {allJobs.length === 1 ? 'job' : 'jobs'}</span>
+            )}
+          </div>
           {allJobsLoading ? (
-            <div className="space-y-3">
-              {[...Array(4)].map((_, i) => <div key={i} className="h-16 bg-surface border border-border rounded-xl animate-pulse" />)}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[...Array(6)].map((_, i) => <div key={i} className="h-24 bg-surface border border-border rounded-xl animate-pulse" />)}
             </div>
           ) : allJobs.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="text-center py-24 border border-dashed border-border rounded-2xl">
               <Briefcase className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground mb-3">No jobs posted yet.</p>
+              <p className="text-sm font-medium text-foreground">No jobs posted yet</p>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">Post a job to start receiving candidates.</p>
               <Link to="/employer/jobs">
                 <button className="text-xs text-primary hover:underline">Go to My Jobs →</button>
               </Link>
             </div>
           ) : (
-            <div className="space-y-2">
-              {allJobs.map((j: any) => (
-                <button
-                  key={j.id}
-                  onClick={() => setSelectedJobId(j.id)}
-                  className="w-full flex items-center gap-4 bg-surface border border-border rounded-xl p-4 hover:border-primary/30 hover:bg-primary/5 transition-colors text-left group"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{j.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {j._count?.applications ?? 0} applicants · <span className="capitalize">{j.status}</span>
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                </button>
-              ))}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {allJobs.map((j: any) => {
+                const count = j._count?.applications ?? j.applicationsCount ?? 0;
+                return (
+                  <button
+                    key={j.id}
+                    onClick={() => setSelectedJobId(j.id)}
+                    className="flex flex-col justify-between bg-surface border border-border rounded-xl p-4 h-28 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm transition-all text-left group"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <Briefcase className="h-4 w-4" />
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{j.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        <span className={cn('font-medium', count > 0 && 'text-primary')}>
+                          {count} {count === 1 ? 'applicant' : 'applicants'}
+                        </span>
+                        {j.status && <> · <span className="capitalize">{j.status}</span></>}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
