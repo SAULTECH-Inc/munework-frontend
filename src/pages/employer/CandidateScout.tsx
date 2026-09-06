@@ -143,8 +143,11 @@ export default function CandidateScoutPage() {
 
   const { data: raw, isLoading } = useQuery({
     queryKey: ['scout-candidates', debouncedSearch],
+    // Unwrap the response envelope once (interceptor) — the paginated
+    // { data: [...] } sits under r.data.data. Reading r.data left the array
+    // double-nested and the list came back empty.
     queryFn: () =>
-      candidatesApi.search({ q: debouncedSearch || undefined, limit: 100 }).then((r) => r.data),
+      candidatesApi.search({ search: debouncedSearch || undefined, limit: 100 }).then((r) => r.data.data ?? r.data),
     staleTime: 60_000,
   });
 
