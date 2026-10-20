@@ -7,3 +7,4 @@ tsconfig.tsbuildinfo
 dev-dist/
 *.log
 .DS_Store
+.vercel

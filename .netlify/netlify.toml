@@ -10,10 +10,10 @@ headers = []
 publish = "/Users/mac/Desktop/projects/SAULTECH/gigs/gighub/frontend/dist"
 publishOrigin = "config"
 commandOrigin = "config"
-base = "/Users/mac/Desktop/projects/SAULTECH/gigs/gighub/frontend"
 command = "npm run build"
 
 [build.environment]
+NPM_FLAGS = "--include=dev"
 
 [build.processing]
 
