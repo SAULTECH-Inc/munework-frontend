@@ -13,6 +13,7 @@ import DatePicker from '@/components/ui/date-picker';
 import TimePicker from '@/components/ui/time-picker';
 import { TopBar } from '@/components/common/TopBar';
 import { MatchDetailsModal } from '@/components/features/MatchDetailsModal';
+import { VettingEvidencePanel } from '@/components/features/VettingEvidencePanel';
 import { FileViewerModal } from '@/components/common/FileViewerModal';
 import { jobsApi, chatApi } from '@/lib/api';
 import { cn, APPLICATION_STATUS_COLOR, APPLICATION_STATUS_LABEL, timeAgo, getInitials, getMatchScoreBadge } from '@/lib/utils';
@@ -550,7 +551,7 @@ function CandidateRow({ app, selected, compact, onSelect, onStatusChange }: Cand
 
 // ─── Candidate detail ─────────────────────────────────────────────────────────
 
-type DetailTab = 'overview' | 'cover' | 'experience' | 'screening';
+type DetailTab = 'overview' | 'cover' | 'experience' | 'screening' | 'vetting';
 
 function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
   app: Application;
@@ -589,6 +590,7 @@ function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
     { id: 'cover', label: 'Cover Letter', show: hasCoverLetter },
     { id: 'experience', label: 'Experience', show: hasExperience },
     { id: 'screening', label: 'Screening', show: !!hasScreening },
+    { id: 'vetting', label: 'Evidence', show: true },
   ].filter(t => t.show) as Array<{ id: DetailTab; label: string; show: boolean }>;
 
   return (
@@ -779,6 +781,8 @@ function CandidateDetail({ app, onStatusChange, onSchedule, onClose }: {
           ))}
         </div>
       )}
+
+      {activeTab === 'vetting' && <VettingEvidencePanel applicationId={app.id} />}
 
       {/* Actions */}
       <div className="flex gap-2 pt-2">

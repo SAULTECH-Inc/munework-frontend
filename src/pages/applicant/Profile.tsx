@@ -16,6 +16,7 @@ import { usersApi, cvsApi } from '@/lib/api';
 import { cn, getInitials } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { PublicProfileLinks } from '@/components/common/PublicProfileLinks';
+import { VettingReferencesPanel } from '@/components/features/VettingReferencesPanel';
 import { COUNTRIES, SKILLS, CERTIFICATIONS } from '@/lib/profile-data';
 import type {
   ApplicantProfile, ProfileExperience, ProfileEducation,
@@ -341,37 +342,37 @@ export default function ApplicantProfilePage() {
 
           {/* References */}
           <ProfileSection id="references" label="References" icon={Users} sectionRefs={sectionRefs} setActive={setActiveSection}>
-            <ArraySection
-              items={profile?.references ?? []}
-              onSave={items => save({ references: items })}
-              saving={update.isPending}
-              renderItem={(ref: ProfileReference, onEdit, onDelete) => (
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 rounded-full bg-surface-raised flex items-center justify-center shrink-0">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{ref.name}</p>
-                    <p className="text-xs text-muted-foreground">{ref.title ?? ''} {ref.company ? `at ${ref.company}` : ''}</p>
-                    {ref.email && <p className="text-xs text-muted-foreground">{ref.email}</p>}
-                    {ref.phone && <p className="text-xs text-muted-foreground">{ref.phone}</p>}
-                  </div>
-                  <ItemActions onEdit={onEdit} onDelete={onDelete} />
-                </div>
-              )}
-              renderForm={(item, onChange) => (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <LabeledInput label="Full name *" value={item.name ?? ''} onChange={v => onChange({ ...item, name: v })} placeholder="Jane Doe" />
-                  <LabeledInput label="Job title" value={item.title ?? ''} onChange={v => onChange({ ...item, title: v })} placeholder="Senior Manager" />
-                  <LabeledInput label="Company" value={item.company ?? ''} onChange={v => onChange({ ...item, company: v })} placeholder="Acme Corp" />
-                  <LabeledInput label="Relationship" value={item.relationship ?? ''} onChange={v => onChange({ ...item, relationship: v })} placeholder="Former manager" />
-                  <LabeledInput label="Email" type="email" value={item.email ?? ''} onChange={v => onChange({ ...item, email: v })} placeholder="jane@example.com" />
-                  <LabeledInput label="Phone" value={item.phone ?? ''} onChange={v => onChange({ ...item, phone: v })} placeholder="+1 555 0000" />
-                </div>
-              )}
-              emptyItem={{ name: '', title: '', company: '', email: '', phone: '', relationship: '' }}
-              emptyLabel="No references added yet"
-            />
+            <div className="space-y-6">
+              <VettingReferencesPanel experience={profile?.workExperience ?? []} skills={profile?.skills ?? []} />
+              <div className="space-y-2 border-t border-border pt-5">
+                <h3 className="text-sm font-semibold">Other profile contacts</h3>
+                <p className="text-xs text-muted-foreground">These are contact details only. They are not invitations, submitted testimony, or verification.</p>
+                <ArraySection
+                  items={profile?.references ?? []}
+                  onSave={items => save({ references: items })}
+                  saving={update.isPending}
+                  renderItem={(ref: ProfileReference, onEdit, onDelete) => (
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-surface-raised flex items-center justify-center shrink-0"><User className="h-4 w-4 text-muted-foreground" /></div>
+                      <div className="flex-1 min-w-0"><p className="text-sm font-medium text-foreground">{ref.name}</p><p className="text-xs text-muted-foreground">{ref.title ?? ''} {ref.company ? `at ${ref.company}` : ''}</p>{ref.email && <p className="text-xs text-muted-foreground">{ref.email}</p>}{ref.phone && <p className="text-xs text-muted-foreground">{ref.phone}</p>}</div>
+                      <ItemActions onEdit={onEdit} onDelete={onDelete} />
+                    </div>
+                  )}
+                  renderForm={(item, onChange) => (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <LabeledInput label="Full name *" value={item.name ?? ''} onChange={v => onChange({ ...item, name: v })} placeholder="Jane Doe" />
+                      <LabeledInput label="Job title" value={item.title ?? ''} onChange={v => onChange({ ...item, title: v })} placeholder="Senior Manager" />
+                      <LabeledInput label="Company" value={item.company ?? ''} onChange={v => onChange({ ...item, company: v })} placeholder="Acme Corp" />
+                      <LabeledInput label="Relationship" value={item.relationship ?? ''} onChange={v => onChange({ ...item, relationship: v })} placeholder="Former manager" />
+                      <LabeledInput label="Email" type="email" value={item.email ?? ''} onChange={v => onChange({ ...item, email: v })} placeholder="jane@example.com" />
+                      <LabeledInput label="Phone" value={item.phone ?? ''} onChange={v => onChange({ ...item, phone: v })} placeholder="+1 555 0000" />
+                    </div>
+                  )}
+                  emptyItem={{ name: '', title: '', company: '', email: '', phone: '', relationship: '' }}
+                  emptyLabel="No profile contacts added"
+                />
+              </div>
+            </div>
           </ProfileSection>
         </div>
       </div>

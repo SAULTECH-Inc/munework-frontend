@@ -9,6 +9,10 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+// Public referee sessions must not inherit the applicant/employer JWT or run
+// through the shared 401-to-login refresh interceptor.
+const publicVettingApi = axios.create({ baseURL: BASE, timeout: 30000 });
+
 // Attach access token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -152,6 +156,35 @@ export const jobsApi = {
   getApplicationById:       (appId: string)             => api.get(`/jobs/my/application-by/${appId}`),
   getMatchDetails:          (applicantId: string, jobId: string) =>
     api.get('/jobs/job-match/applicant', { params: { applicantId, jobId } }),
+};
+
+// ─── Candidate vetting ────────────────────────────────────────────────────────
+export const vettingApi = {
+  mine: () => api.get('/vetting'),
+  createClaim: (data: any) => api.post('/vetting/claims', data),
+  reviseClaim: (id: string, data: any) => api.post(`/vetting/claims/${id}/revisions`, data),
+  createInvitation: (data: any, key: string) => api.post('/vetting/invitations', data, { headers: { 'Idempotency-Key': key } }),
+  resendInvitation: (id: string) => api.post(`/vetting/invitations/${id}/resend`),
+  cancelInvitation: (id: string) => api.post(`/vetting/invitations/${id}/cancel`),
+  requestCorrection: (id: string) => api.post(`/vetting/references/${id}/request-correction`),
+  setVisibility: (id: string, state: 'published' | 'hidden') => api.patch(`/vetting/references/${id}/visibility`, { state }),
+  setSettings: (attachToApplications: boolean) => api.post('/vetting/settings', { attachToApplications }),
+  createEvidence: (data: any) => api.post('/vetting/evidence', data),
+  withdrawEvidence: (id: string) => api.delete(`/vetting/evidence/${id}`),
+  requestCheck: (data: any) => api.post('/vetting/checks', data),
+  createDispute: (data: any) => api.post('/vetting/disputes', data),
+  applicationEvidence: (applicationId: string) => api.get(`/applications/${applicationId}/vetting`),
+  startRefereeSession: (invitationToken: string) => publicVettingApi.post('/vetting/referee/session', { invitationToken }),
+  verifyRefereeSession: (invitationToken: string, code: string) => publicVettingApi.post('/vetting/referee/session/verify', { invitationToken, code }),
+  refereeContext: (sessionToken: string) => publicVettingApi.get('/vetting/referee/session/context', { headers: { 'x-vetting-session': sessionToken } }),
+  submitReference: (sessionToken: string, data: any, correction = false) => publicVettingApi.post(
+    `/vetting/referee/references${correction ? '/correction' : ''}`,
+    data,
+    { headers: { 'x-vetting-session': sessionToken } },
+  ),
+  declineInvitation: (sessionToken: string) => publicVettingApi.post('/vetting/referee/decline', {}, { headers: { 'x-vetting-session': sessionToken } }),
+  withdrawReference: (sessionToken: string) => publicVettingApi.post('/vetting/referee/withdraw', {}, { headers: { 'x-vetting-session': sessionToken } }),
+  refereeDispute: (sessionToken: string, data: any) => publicVettingApi.post('/vetting/referee/disputes', data, { headers: { 'x-vetting-session': sessionToken } }),
 };
 
 // ─── CVs ──────────────────────────────────────────────────────────────────────

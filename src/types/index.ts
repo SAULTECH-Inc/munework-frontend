@@ -252,6 +252,10 @@ export interface Job {
   startDate?: string;
   experienceYears?: number;
   skillSet?: string[];
+  evidenceRequests?: Array<{
+    skill: string;
+    evidenceTypes: Array<'reference' | 'work_sample'>;
+  }>;
   preferredCandidateCountry?: string[];
   preferredCandidatePreviousCompany?: string[];
   preferredCandidateUniversity?: string[];

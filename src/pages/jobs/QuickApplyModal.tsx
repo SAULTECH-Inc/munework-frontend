@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, CheckCircle2, FileText, Sparkles, Video, Upload, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, FileText, Sparkles, Video, Upload, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -255,6 +255,16 @@ export function QuickApplyModal({ job, open, onClose }: Props) {
               )}
               {errors.cvId && <p className="text-xs text-destructive mt-1">{errors.cvId.message}</p>}
             </div>
+
+            {(job.evidenceRequests ?? []).length > 0 && (
+              <section className="space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <div className="flex gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /><div><p className="text-xs font-semibold">Optional evidence requested</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">This does not change your match score or block your application. If you enabled vetting evidence sharing, published evidence linked to these skills may be shown to the employer.</p></div></div>
+                <div className="space-y-2">{job.evidenceRequests!.map((request) => <div key={request.skill} className="rounded-lg border border-border/60 bg-surface p-2.5">
+                  <p className="text-xs font-medium">{request.skill}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{request.evidenceTypes.map((type) => type === 'reference' ? 'Professional reference' : 'Work sample or portfolio link').join(' · ')}</p>
+                </div>)}</div>
+              </section>
+            )}
 
             {/* Screening questions */}
             {job.screeningQuestions && job.screeningQuestions.length > 0 && (

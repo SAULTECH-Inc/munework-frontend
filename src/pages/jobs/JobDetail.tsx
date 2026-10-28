@@ -363,6 +363,20 @@ export default function JobDetailPage() {
               </div>
             )}
 
+            {(job.evidenceRequests ?? []).length > 0 && (
+              <div className="glass rounded-2xl border border-border/50 p-6">
+                <SectionHeading>Optional Supporting Evidence</SectionHeading>
+                <p className="mb-4 text-xs leading-5 text-muted-foreground">The employer would like to review evidence related to these skills. It is optional and does not change your MuneWork match score. Missing evidence is treated as unknown, not as a failed assessment.</p>
+                <div className="space-y-3">
+                  {job.evidenceRequests!.map((request) => <div key={request.skill} className="rounded-lg border border-border/60 bg-surface-raised p-3">
+                    <p className="text-xs font-semibold">{request.skill}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{request.evidenceTypes.map((type) => type === 'reference' ? 'Professional reference' : 'Work sample or portfolio link').join(' · ')}</p>
+                  </div>)}
+                </div>
+                {isExternal && <p className="mt-3 text-[11px] text-muted-foreground">Evidence you share on MuneWork is not sent to external application sites.</p>}
+              </div>
+            )}
+
             {isApplicant && (
               <div className="glass rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 p-5 flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">

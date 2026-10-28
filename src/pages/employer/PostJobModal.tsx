@@ -49,6 +49,12 @@ interface AppMethods {
   byVideo: boolean;
 }
 
+type EvidenceRequestType = 'reference' | 'work_sample';
+interface EvidenceRequest {
+  skill: string;
+  evidenceTypes: EvidenceRequestType[];
+}
+
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const schema = z.object({
@@ -176,6 +182,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
   const [preferredGrades, setPreferredGrades] = useState<SelectOption[]>([]);
   const [appMethods, setAppMethods] = useState<AppMethods>(DEFAULT_APP_METHODS);
   const [screeningQuestions, setScreeningQuestions] = useState<ScreeningQuestion[]>([]);
+  const [evidenceRequests, setEvidenceRequests] = useState<EvidenceRequest[]>([]);
   const [stepError, setStepError] = useState('');
   const [postedJob, setPostedJob] = useState<{ id: string; title: string } | null>(null);
 
@@ -236,6 +243,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
         aiAnalyzeCareerProgression: (editJob.aiSettings as any)?.analyzeCareerProgression ?? false,
       });
       setSkillItems((editJob.skillSet ?? (editJob as any).skills ?? []).map((s: string) => ({ label: s, value: s })));
+      setEvidenceRequests(editJob.evidenceRequests ?? []);
       setCriticalSkills((editJob.aiSettings as any)?.criticalSkills?.map((s: string) => ({ label: s, value: s })) ?? []);
       setPreferredCountries((editJob as any).preferredCandidateCountry?.map((c: string) => ({ label: c, value: c })) ?? []);
       setPreferredUniversities((editJob as any).preferredCandidateUniversity?.map((u: string) => ({ label: u, value: u })) ?? []);
@@ -262,6 +270,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
       setContentTab('description');
       setSalaryMode('hidden');
       setSkillItems([]);
+      setEvidenceRequests([]);
       setCriticalSkills([]);
       setPreferredCountries([]);
       setPreferredUniversities([]);
@@ -397,6 +406,7 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
         applicationDeadline: data.applicationDeadline,
         priority: data.priority,
         skills: skillItems.map(s => s.value),
+        evidenceRequests,
         preferredCandidateCountry: preferredCountries.map(c => c.value),
         preferredCandidateUniversity: preferredUniversities.map(u => u.value),
         preferredCandidateQualification: preferredQualifications.map(q => q.value),
@@ -452,6 +462,18 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
 
   const updateQuestion = (i: number, patch: Partial<ScreeningQuestion>) => {
     setScreeningQuestions(prev => prev.map((q, idx) => idx === i ? { ...q, ...patch } : q));
+  };
+
+  const toggleEvidenceRequest = (skill: string, evidenceType: EvidenceRequestType, checked: boolean) => {
+    setEvidenceRequests((current) => {
+      const existing = current.find((request) => request.skill.toLowerCase() === skill.toLowerCase());
+      const selectedTypes = new Set(existing?.evidenceTypes ?? []);
+      if (checked) selectedTypes.add(evidenceType);
+      else selectedTypes.delete(evidenceType);
+      const next = current.filter((request) => request.skill.toLowerCase() !== skill.toLowerCase());
+      if (selectedTypes.size) next.push({ skill, evidenceTypes: [...selectedTypes] });
+      return next;
+    });
   };
   const removeQuestion = (i: number) => setScreeningQuestions(prev => prev.filter((_, idx) => idx !== i));
 
@@ -765,10 +787,35 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
                   <MultiSelect
                     options={SKILL_OPTIONS}
                     selected={skillItems}
-                    onChange={setSkillItems}
+                    onChange={(items) => {
+                      setSkillItems(items);
+                      const selectedSkills = new Set(items.map((item) => item.value.trim().toLowerCase()));
+                      setEvidenceRequests((current) => current.filter((request) => selectedSkills.has(request.skill.trim().toLowerCase())));
+                    }}
                     placeholder="Search and add required skills…"
                   />
                 </Field>
+
+                <section className="space-y-3 rounded-xl border border-border bg-surface-raised p-4">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Optional evidence requests</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">Ask for a reference or work sample for a listed skill. Candidates see this before applying. Requests are for employer review only: missing evidence does not reduce the MuneWork match score or block an application.</p>
+                  </div>
+                  {skillItems.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Add required skills above to request evidence for them.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {skillItems.map((skill) => {
+                        const request = evidenceRequests.find((item) => item.skill.toLowerCase() === skill.value.toLowerCase());
+                        return <div key={skill.value} className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border bg-surface p-3">
+                          <p className="min-w-28 flex-1 text-xs font-medium">{skill.label}</p>
+                          <label className="flex items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" checked={request?.evidenceTypes.includes('reference') ?? false} onChange={(e) => toggleEvidenceRequest(skill.value, 'reference', e.target.checked)} />Professional reference</label>
+                          <label className="flex items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" checked={request?.evidenceTypes.includes('work_sample') ?? false} onChange={(e) => toggleEvidenceRequest(skill.value, 'work_sample', e.target.checked)} />Work sample / portfolio link</label>
+                        </div>;
+                      })}
+                    </div>
+                  )}
+                </section>
 
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-3">Application methods</p>

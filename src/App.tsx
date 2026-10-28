@@ -56,6 +56,7 @@ import CandidateScoutPage from '@/pages/employer/CandidateScout';
 import EmailPreferencesPage from '@/pages/EmailPreferences';
 import UnsubscribePage from '@/pages/Unsubscribe';
 import PaymentResultPage from '@/pages/PaymentResult';
+import RefereeVettingPage from '@/pages/vetting/RefereeVetting';
 
 import { useAuthStore } from '@/store/auth.store';
 
@@ -93,6 +94,7 @@ export default function App() {
 
           {/* OAuth redirect target — no layout, handles its own redirect */}
           <Route path="/auth/social/:action/callback" element={<OAuthCallback />} />
+          <Route path="/vetting/referee" element={<RefereeVettingPage />} />
 
           {/* Shareable profiles: readable without a session, full chrome with one */}
           <Route element={<PublicLayout />}>
