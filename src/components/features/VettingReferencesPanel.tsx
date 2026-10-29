@@ -209,7 +209,7 @@ export function VettingReferencesPanel({ experience, skills }: { experience: any
         </div>
         <label className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
           <input type="checkbox" checked={contactConsent} onChange={(e) => setContactConsent(e.target.checked)} className="mt-1" />
-          I have permission to contact this person about the selected claims. I will not contact a current employer without explicit permission for this invitation.
+          I have permission to contact this person about the selected claims and include a link to my MuneWork profile so they can identify me. I will not contact a current employer without explicit permission for this invitation.
         </label>
         <Button size="sm" onClick={() => createInvitation.mutate()} disabled={createInvitation.isPending || selectedClaims.length === 0 || !contactConsent || refereeName.trim().length < 2 || !refereeEmail.includes('@') || !relationshipType}>
           {createInvitation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />} Send invitation
