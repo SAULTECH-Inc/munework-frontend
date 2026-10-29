@@ -1,5 +1,5 @@
 import { Outlet, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/common/Sidebar';
 import { MobileBottomNav } from '@/components/common/MobileBottomNav';
 import { ChatWidget } from '@/components/common/ChatWidget';
@@ -22,6 +22,7 @@ export function AppLayout() {
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { chatOpen } = useUiStore();
   const qc = useQueryClient();
+  const shownNotificationIds = useRef(new Set<string>());
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -35,9 +36,24 @@ export function AppLayout() {
     if (!notifSock && !chatSock) return;
 
     // ── Real-time notification toasts ────────────────────────────────────────
-    const onNotification = (payload: { type: string; title: string; message: string; data?: any }) => {
+    const onNotification = (payload: {
+      id?: string;
+      type: string;
+      title: string;
+      message?: string;
+      body?: string;
+      data?: any;
+    }) => {
+      if (payload.id) {
+        if (shownNotificationIds.current.has(payload.id)) return;
+        shownNotificationIds.current.add(payload.id);
+        if (shownNotificationIds.current.size > 200) {
+          const oldest = shownNotificationIds.current.values().next().value;
+          if (oldest) shownNotificationIds.current.delete(oldest);
+        }
+      }
       const icon = NOTIFICATION_ICONS[payload.type] || '🔔';
-      toast(`${icon} ${payload.title}\n${payload.message}`, {
+      toast(`${icon} ${payload.title}\n${payload.message ?? payload.body ?? ''}`, {
         duration: 5000,
         style: {
           background: 'var(--surface-raised, #1e1e2e)',

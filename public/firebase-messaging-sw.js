@@ -45,6 +45,7 @@ if (!firebaseConfig.apiKey || !firebaseConfig.appId) {
       badge: '/brand/favicon-48.png',
       data: payload.data,
       tag: payload.data?.notificationId || undefined,
+      renotify: false,
     });
   });
 }

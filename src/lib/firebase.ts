@@ -13,6 +13,8 @@ const firebaseConfig = {
 };
 
 const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY || '';
+let foregroundListenerRegistered = false;
+let serviceWorkerMessageListenerRegistered = false;
 
 export async function initFirebaseMessaging() {
   try {
@@ -85,23 +87,37 @@ export async function initFirebaseMessaging() {
     // Clicking a notification focuses this tab and hands us the destination,
     // because the worker cannot navigate a client it does not control.
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'NOTIFICATION_CLICK' && event.data.url) {
-          window.location.assign(event.data.url);
-        }
-      });
+      if (!serviceWorkerMessageListenerRegistered) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data?.type === 'NOTIFICATION_CLICK' && event.data.url) {
+            window.location.assign(event.data.url);
+          }
+        });
+        serviceWorkerMessageListenerRegistered = true;
+      }
     }
 
-    // Listen for foreground messages
-    onMessage(messaging, (payload) => {
-      console.log('[FCM] Foreground notification received:', payload);
-      if (payload.notification && typeof window !== 'undefined' && 'Notification' in window) {
-        new Notification(payload.notification.title || 'Mune Work', {
-          body: payload.notification.body,
-          icon: '/brand/logo-mark-192.png',
-        });
-      }
-    });
+    // A visible app already shows the notification over its socket connection.
+    // Only create a browser notification when the app is not visible, and add
+    // this listener once so reinitializing Firebase cannot duplicate alerts.
+    if (!foregroundListenerRegistered) {
+      onMessage(messaging, (payload) => {
+        console.log('[FCM] Foreground notification received:', payload);
+        if (
+          payload.notification &&
+          typeof document !== 'undefined' &&
+          document.visibilityState !== 'visible' &&
+          typeof window !== 'undefined' &&
+          'Notification' in window
+        ) {
+          new Notification(payload.notification.title || 'Mune Work', {
+            body: payload.notification.body,
+            icon: '/brand/logo-mark-192.png',
+          });
+        }
+      });
+      foregroundListenerRegistered = true;
+    }
 
     return messaging;
   } catch (err) {
