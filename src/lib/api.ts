@@ -22,7 +22,10 @@ api.interceptors.request.use((config) => {
 
 // Auto-refresh on 401
 let refreshing = false;
-let queue: Array<(token: string) => void> = [];
+// Requests that hit a 401 while a refresh is already in flight wait here. Each
+// entry must be settled either way — dropping one leaves its caller's promise
+// (and any loading spinner tied to it) pending forever.
+let queue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
 
 api.interceptors.response.use(
   (res) => res,
@@ -39,10 +42,14 @@ api.interceptors.response.use(
 
     if (err.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       if (refreshing) {
-        return new Promise((resolve) => {
-          queue.push((token) => {
-            original.headers.Authorization = `Bearer ${token}`;
-            resolve(api(original));
+        return new Promise((resolve, reject) => {
+          queue.push({
+            resolve: (token) => {
+              original._retry = true;
+              original.headers.Authorization = `Bearer ${token}`;
+              resolve(api(original));
+            },
+            reject,
           });
         });
       }
@@ -51,12 +58,14 @@ api.interceptors.response.use(
       try {
         const { data } = await axios.post(`${BASE}/auth/refresh-token`, {}, { withCredentials: true });
         const token = data.accessToken ?? data.data?.accessToken;
+        if (!token) throw new Error('Refresh response did not include an access token');
         useAuthStore.getState().updateToken(token);
-        queue.forEach((cb) => cb(token));
+        queue.forEach(({ resolve }) => resolve(token));
         queue = [];
         original.headers.Authorization = `Bearer ${token}`;
         return api(original);
       } catch {
+        queue.forEach(({ reject }) => reject(err));
         queue = [];
         useAuthStore.getState().clearAuth();
         if (window.location.pathname !== '/login') {
