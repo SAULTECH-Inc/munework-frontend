@@ -20,6 +20,7 @@ import SearchableSelect from '@/components/ui/searchable-select';
 import SearchableSelectWithAdd from '@/components/ui/searchable-select-with-add';
 import { SKILLS, COUNTRIES, CURRENCIES, DEPARTMENTS } from '@/lib/profile-data';
 import { jobsApi, aiApi } from '@/lib/api';
+import { formatDateOnly, parseDateOnly } from '@/lib/date-only';
 import type { Job } from '@/types';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -660,8 +661,8 @@ export function PostJobModal({ open, onClose, editJob }: Props) {
                   </Field>
                   <Field label="Application deadline">
                     <DatePicker
-                      selectedDate={watch('applicationDeadline') ? new Date(watch('applicationDeadline') as string) : null}
-                      onDateChange={d => setValue('applicationDeadline', d ? d.toISOString().slice(0, 10) : '')}
+                      selectedDate={parseDateOnly(watch('applicationDeadline'))}
+                      onDateChange={d => setValue('applicationDeadline', d ? formatDateOnly(d) : '')}
                     />
                   </Field>
                 </div>

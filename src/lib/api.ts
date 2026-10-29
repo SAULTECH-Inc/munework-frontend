@@ -127,6 +127,7 @@ export const jobsApi = {
   toggleBookmark:       (id: string)   => api.post(`/jobs/${id}/bookmark`),
   getMyApplications:    (params?: any) => api.get('/jobs/my/applications', { params }),
   getRecommendations:   (params?: any) => api.get('/jobs/my/recommendations', { params }),
+  getMatchScores:      (jobIds: string[]) => api.post('/jobs/my/match-scores', { jobIds }, { timeout: 30000 }),
   getEmployerJobs:      (params?: any) => api.get('/jobs/employer/my-jobs', { params }),
   getApplicationsForJob: (jobId: string, params?: any) => api.get(`/jobs/${jobId}/applications`, { params }),
   updateApplicationStatus: (

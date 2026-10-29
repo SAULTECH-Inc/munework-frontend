@@ -13,6 +13,8 @@ import SearchableSelect from '@/components/ui/searchable-select';
 import { JobDetailDrawer } from './JobDetailDrawer';
 import { QuickApplyModal } from './QuickApplyModal';
 import { jobsApi } from '@/lib/api';
+import { daysUntilDateOnly } from '@/lib/date-only';
+import { useJobMatchScores } from '@/hooks/useJobMatchScores';
 import { cn, formatSalary, timeAgo, JOB_TYPE_LABEL, getInitials, getMatchScoreBadge } from '@/lib/utils';
 import { COUNTRIES } from '@/lib/profile-data';
 import type { Job } from '@/types';
@@ -64,7 +66,8 @@ export default function JobsPage() {
 
   // Jobs are browsable signed out, so anything applicant-only has to be gated
   // rather than assumed.
-  const isApplicant = useAuthStore(st => st.user?.userType === 'applicant');
+  const applicantId = useAuthStore(st => st.user?.userType === 'applicant' ? st.user.id : undefined);
+  const isApplicant = Boolean(applicantId);
 
   // Filter params (without page) — the query key. Changing any filter refetches
   // from page 1 automatically.
@@ -105,7 +108,8 @@ export default function JobsPage() {
   // Flatten every loaded page into one list.
   const allJobs: Job[] = (data?.pages ?? []).flatMap((p: any) => (p?.data ?? p ?? []) as Job[]);
   const recJobs: Job[] = (recData as any)?.data ?? recData ?? [];
-  const jobs = activeTab === 'recommended' ? recJobs : allJobs;
+  const unscoredJobs = activeTab === 'recommended' ? recJobs : allJobs;
+  const { jobs, matchScoreStatus } = useJobMatchScores(unscoredJobs, applicantId);
   const isLoadingJobs = activeTab === 'recommended' ? recLoading : isLoading;
 
   const total = (data?.pages?.[0] as any)?.total ?? allJobs.length;
@@ -418,7 +422,8 @@ export default function JobsPage() {
                   job={job}
                   selected={selectedJob?.id === job.id}
                   compact={false}
-                  showMatchScore={activeTab === 'recommended'}
+                  showMatchScore={isApplicant}
+                  matchScoreStatus={matchScoreStatus}
                   onSelect={() => setSelectedJob(job)}
                   onApply={() => setApplyJob(job)}
                   onBookmark={() => toggleBookmark.mutate(job.id)}
@@ -501,6 +506,7 @@ interface JobCardProps {
   selected: boolean;
   compact: boolean;
   showMatchScore?: boolean;
+  matchScoreStatus?: 'pending' | 'unavailable';
   onSelect: () => void;
   onApply: () => void;
   onBookmark: () => void;
@@ -510,7 +516,7 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-export function JobCard({ job, selected, compact, showMatchScore, onSelect, onApply, onBookmark }: JobCardProps) {
+export function JobCard({ job, selected, compact, showMatchScore, matchScoreStatus, onSelect, onApply, onBookmark }: JobCardProps) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [showAllSkills, setShowAllSkills] = useState(false);
@@ -519,8 +525,15 @@ export function JobCard({ job, selected, compact, showMatchScore, onSelect, onAp
   const visibleSkills = showAllSkills ? skills : skills.slice(0, 5);
   const hasMoreSkills = skills.length > 5;
 
-  const daysLeft = job.endDate ? Math.ceil((new Date(job.endDate).getTime() - Date.now()) / 86400000) : null;
+  const daysLeft = daysUntilDateOnly(job.endDate);
   const isUrgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 3;
+  const deadlineLabel = daysLeft === null
+    ? (job.endDate ? null : 'No deadline')
+    : daysLeft < 0
+      ? 'Deadline passed'
+      : daysLeft === 0
+        ? 'Due today'
+        : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`;
   const descriptionText = job.description ? stripHtml(job.description) : '';
 
   const companyRaw = job.employer?.companyName || job.company || 'Company';
@@ -549,9 +562,15 @@ export function JobCard({ job, selected, compact, showMatchScore, onSelect, onAp
               <h3 className="text-base font-bold text-foreground truncate font-['Outfit',sans-serif]">
                 {job.title}
               </h3>
-              {isUrgent && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-destructive bg-destructive/10 border border-destructive/20 rounded-full px-2 py-0.5 shrink-0">
-                  <AlertCircle className="h-3 w-3" /> {daysLeft}d left
+              {deadlineLabel && (
+                <span className={cn(
+                  'inline-flex items-center gap-1 text-[10px] font-bold border rounded-full px-2 py-0.5 shrink-0',
+                  isUrgent
+                    ? 'text-destructive bg-destructive/10 border-destructive/20'
+                    : 'text-muted-foreground bg-muted/40 border-border/60',
+                )}>
+                  {isUrgent ? <AlertCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                  {deadlineLabel}
                 </span>
               )}
             </div>
@@ -568,9 +587,17 @@ export function JobCard({ job, selected, compact, showMatchScore, onSelect, onAp
 
         {/* Top Right Action & Score */}
         <div className="flex items-center gap-2 shrink-0">
-          {(() => {
+          {showMatchScore && (() => {
             const badge = getMatchScoreBadge(job.aiMatchScore ?? job.matchScore);
-            if (!badge) return null;
+            if (!badge) {
+              if (matchScoreStatus === 'pending') {
+                return <span className="text-[10px] font-semibold text-muted-foreground border border-border/60 bg-muted/40 rounded-full px-3 py-1">Calculating match…</span>;
+              }
+              if (matchScoreStatus === 'unavailable') {
+                return <span className="text-[10px] font-semibold text-muted-foreground border border-border/60 bg-muted/40 rounded-full px-3 py-1" title="The match service could not return a score">Match unavailable</span>;
+              }
+              return null;
+            }
             return (
               <span
                 className={cn('text-[11px] font-bold rounded-full px-3 py-1 flex items-center gap-1.5 border shadow-sm transition-all', badge.style)}

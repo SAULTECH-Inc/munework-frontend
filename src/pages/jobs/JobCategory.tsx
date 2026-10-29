@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Briefcase } from 'lucide-react';
 import { jobsApi } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
+import { useJobMatchScores } from '@/hooks/useJobMatchScores';
 import { useSeo, useJsonLd } from '@/lib/seo';
 import { findCategory } from '@/lib/job-categories';
 import { BrowseJobsBy } from '@/components/common/BrowseJobsBy';
@@ -20,7 +21,8 @@ import type { Job } from '@/types';
 export default function JobCategoryPage() {
   const { slug, city } = useParams<{ slug?: string; city?: string }>();
   const navigate = useNavigate();
-  const isApplicant = useAuthStore((st) => st.user?.userType === 'applicant');
+  const applicantId = useAuthStore((st) => st.user?.userType === 'applicant' ? st.user.id : undefined);
+  const isApplicant = Boolean(applicantId);
 
   // Location pages live at /jobs/in/:city, everything else at /jobs/:slug.
   const key = city ? `in/${city}` : (slug ?? '');
@@ -63,7 +65,8 @@ export default function JobCategoryPage() {
   // becomes a thin page that Google may index.
   if (!category) return <Navigate to="/jobs" replace />;
 
-  const jobs: Job[] = (data as any)?.data ?? data ?? [];
+  const unscoredJobs: Job[] = (data as any)?.data ?? data ?? [];
+  const { jobs, matchScoreStatus } = useJobMatchScores(unscoredJobs, applicantId);
   const total: number = (data as any)?.total ?? jobs.length;
 
   return (
@@ -115,6 +118,8 @@ export default function JobCategoryPage() {
               job={job}
               selected={false}
               compact={false}
+              showMatchScore={isApplicant}
+              matchScoreStatus={matchScoreStatus}
               onSelect={() => navigate(`/jobs/${job.id}`)}
               onApply={() => navigate(`/jobs/${job.id}`)}
               onBookmark={() => {
