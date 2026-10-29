@@ -2165,10 +2165,12 @@ function flattenApplicantNotifs(s: any): Record<string, boolean> {
     recProfilePrefs:       !!o.jobRecommendations?.option?.profilePreferences,
     recSavedSearch:        !!o.jobRecommendations?.option?.savedJobSearch,
     recJobMatch:           !!o.jobRecommendations?.option?.jobMatchFound,
-    recEmail:              !!o.jobRecommendations?.notificationType?.emailNotification,
-    recPush:               !!o.jobRecommendations?.notificationType?.pushNotification,
+    recEmail:              !!o.jobRecommendations?.notificationType?.emailNotification || !!o.jobRecommendations?.notificationType?.all,
+    recPush:               !!o.jobRecommendations?.notificationType?.pushNotification || !!o.jobRecommendations?.notificationType?.all,
+    recInstant:            !!o.jobRecommendations?.frequency?.instant,
     recDaily:              !!o.jobRecommendations?.frequency?.daily,
     recWeekly:             !!o.jobRecommendations?.frequency?.weekly,
+    recMonthly:            !!o.jobRecommendations?.frequency?.monthly,
     // interviewInvitation
     ivCancelled:           !!o.interviewInvitation?.option?.scheduleCancelled,
     ivRescheduled:         !!o.interviewInvitation?.option?.scheduleRescheduled,
@@ -2276,7 +2278,12 @@ const APPLICANT_NOTIF_GROUPS = [
       { key: 'recJobMatch',     label: 'Job match found',              desc: 'When we find a strong job match for you' },
     ],
     channels: [{ key: 'recEmail', label: 'Email' }, { key: 'recPush', label: 'Push' }],
-    frequency: [{ key: 'recDaily', label: 'Daily digest' }, { key: 'recWeekly', label: 'Weekly digest' }],
+    frequency: [
+      { key: 'recInstant', label: 'Instant per match' },
+      { key: 'recDaily', label: '3x weekly (Mon, Wed, Fri)' },
+      { key: 'recWeekly', label: 'Weekly' },
+      { key: 'recMonthly', label: 'Monthly' },
+    ],
   },
   {
     id: 'interviewInvitation', group: 'Interview Invitations', icon: Monitor,
@@ -2430,13 +2437,58 @@ function NotificationsTab() {
     setPrefs(flat);
   }, [settingsData, isEmployer]);
 
-  const toggle = (key: string) => setPrefs(p => ({ ...p, [key]: !p[key] }));
+  const recommendationFrequencyKeys = ['recInstant', 'recDaily', 'recWeekly', 'recMonthly'];
+  const toggle = (key: string) => {
+    if (recommendationFrequencyKeys.includes(key)) {
+      setPrefs(p => ({
+        ...p,
+        recInstant: key === 'recInstant',
+        recDaily: key === 'recDaily',
+        recWeekly: key === 'recWeekly',
+        recMonthly: key === 'recMonthly',
+      }));
+      return;
+    }
+    setPrefs(p => ({ ...p, [key]: !p[key] }));
+  };
 
   const save = useMutation({
     mutationFn: async () => {
+      const recommendationSettings = settingsData?.notifications?.options?.jobRecommendations ?? {};
+      const applicantSettings = {
+        ...settingsData,
+        notifications: {
+          ...settingsData?.notifications,
+          options: {
+            ...settingsData?.notifications?.options,
+            jobRecommendations: {
+              ...recommendationSettings,
+              notificationType: {
+                ...recommendationSettings.notificationType,
+                emailNotification: !!prefs.recEmail,
+                pushNotification: !!prefs.recPush,
+                all: false,
+              },
+              frequency: {
+                ...recommendationSettings.frequency,
+                instant: !!prefs.recInstant,
+                daily: !!prefs.recDaily,
+                weekly: !!prefs.recWeekly,
+                monthly: !!prefs.recMonthly,
+              },
+              option: {
+                ...recommendationSettings.option,
+                profilePreferences: !!prefs.recProfilePrefs,
+                savedJobSearch: !!prefs.recSavedSearch,
+                jobMatchFound: !!prefs.recJobMatch,
+              },
+            },
+          },
+        },
+      };
       await settingsApi.update({
         userType,
-        ...(isEmployer ? { employer: settingsData } : { applicant: settingsData }),
+        ...(isEmployer ? { employer: settingsData } : { applicant: applicantSettings }),
       });
     },
     onSuccess: () => {
@@ -2491,7 +2543,7 @@ function NotificationsTab() {
 
           {/* Channel toggles */}
           {group.channels && group.channels.length > 0 && (
-            <div className="flex items-center gap-4 px-4 py-2.5 border-t border-border bg-surface-raised/50">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 border-t border-border bg-surface-raised/50">
               <span className="text-[11px] text-muted-foreground font-medium">Channels:</span>
               {group.channels.map(ch => (
                 <label key={ch.key} className="flex items-center gap-1.5 cursor-pointer">
