@@ -83,9 +83,16 @@ export function VettingReferencesPanel({ experience, skills }: { experience: any
       overlapStart: overlapStart || undefined, overlapEnd: overlapEnd || undefined,
       claimRevisionIds: selectedClaims, contactConsent,
     }, crypto.randomUUID()),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const emailDeliveryStatus = unwrap(response)?.emailDeliveryStatus;
       invalidate(); setRefereeName(''); setRefereeEmail(''); setRelationshipType(''); setRelationship(''); setOverlapStart(''); setOverlapEnd(''); setContactConsent(false);
-      toast.success('Reference invitation queued');
+      if (emailDeliveryStatus === 'sent') {
+        toast.success('Invitation email accepted by the mail provider');
+      } else if (emailDeliveryStatus === 'pending' || emailDeliveryStatus === 'sending') {
+        toast.error('Invitation saved, but email delivery is still pending. Retry it from the invitation list.');
+      } else {
+        toast.success('Invitation already exists');
+      }
     },
     onError: () => toast.error('Could not create the invitation'),
   });
@@ -118,7 +125,19 @@ export function VettingReferencesPanel({ experience, skills }: { experience: any
       if (!explanation) return null;
       return vettingApi.createDispute({ targetType: 'reference', targetId: id, explanation });
     },
-    onSuccess: () => { invalidate(); toast.success('Request saved'); },
+    onSuccess: (response, variables) => {
+      invalidate();
+      if (variables.kind === 'resend' || variables.kind === 'correct') {
+        const emailDeliveryStatus = unwrap(response)?.emailDeliveryStatus;
+        if (emailDeliveryStatus === 'sent') {
+          toast.success('Invitation email accepted by the mail provider');
+        } else {
+          toast.error('Request saved, but email delivery is still pending. You can retry it from the list.');
+        }
+        return;
+      }
+      toast.success('Request saved');
+    },
     onError: () => toast.error('Could not complete that request'),
   });
 
