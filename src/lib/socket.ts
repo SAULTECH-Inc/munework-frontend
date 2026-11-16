@@ -4,7 +4,18 @@ let chatSocket: Socket | null = null;
 let notifSocket: Socket | null = null;
 
 export function connectSockets(token: string) {
-  if (chatSocket?.connected && notifSocket?.connected) return;
+  // Existing sockets are reused rather than recreated: components attach their
+  // listeners to these instances once, so swapping them out would silently
+  // detach every listener. Refresh the token (used on the next handshake) and
+  // revive any socket that a connect_error or pagehide left disconnected.
+  if (chatSocket || notifSocket) {
+    for (const sock of [chatSocket, notifSocket]) {
+      if (!sock) continue;
+      sock.auth = { token };
+      if (!sock.connected) sock.connect();
+    }
+    return;
+  }
 
   const wsBase = import.meta.env.VITE_WS_BASE_URL || import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/v1\/?$/, '') || 'http://localhost:3000';
 
@@ -56,8 +67,25 @@ export function disconnectSockets() {
 export function getChatSocket() { return chatSocket; }
 export function getNotifSocket() { return notifSocket; }
 
-// Cleanly disconnect when browser tab enters BFCache or page unloads
+// Pause sockets while the page is hidden in the BFCache or frozen, and resume
+// them when it comes back. Unlike disconnectSockets() (logout), this keeps the
+// instances so listeners registered by mounted components survive the round trip.
+function pauseSockets() {
+  chatSocket?.disconnect();
+  notifSocket?.disconnect();
+}
+
+function resumeSockets() {
+  const token = localStorage.getItem('accessToken');
+  if (token) connectSockets(token);
+}
+
 if (typeof window !== 'undefined') {
-  window.addEventListener('pagehide', () => disconnectSockets());
-  window.addEventListener('freeze', () => disconnectSockets());
+  window.addEventListener('pagehide', pauseSockets);
+  document.addEventListener('freeze', pauseSockets);
+  window.addEventListener('pageshow', (e) => { if (e.persisted) resumeSockets(); });
+  document.addEventListener('resume', resumeSockets);
+  // A connect_error during an outage stops reconnection; retry when the
+  // browser reports the network is back.
+  window.addEventListener('online', resumeSockets);
 }

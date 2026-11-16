@@ -40,6 +40,7 @@ export const useAuthStore = create<AuthState>()(
 
       updateToken: (token) => {
         localStorage.setItem('accessToken', token);
+        connectSockets(token);
         set({ accessToken: token });
       },
 
@@ -49,6 +50,9 @@ export const useAuthStore = create<AuthState>()(
       name: 'munework-auth',
       partialize: (s) => ({ user: s.user, accessToken: s.accessToken, isAuthenticated: s.isAuthenticated }),
       onRehydrateStorage: () => (state) => {
+        // setAuth only runs on login, so a page reload with a persisted session
+        // would otherwise never open the realtime sockets.
+        if (state?.isAuthenticated && state.accessToken) connectSockets(state.accessToken);
         state?._setHasHydrated(true);
       },
     },
