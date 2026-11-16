@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/common/Sidebar';
 import { MobileBottomNav } from '@/components/common/MobileBottomNav';
@@ -22,6 +22,9 @@ export function AppLayout() {
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const { chatOpen } = useUiStore();
   const qc = useQueryClient();
+  // The messages page has its own composer, and its send button sits exactly
+  // where the floating chat button would. A second chat launcher is no use there.
+  const onChatPage = useLocation().pathname.startsWith('/chat');
   const shownNotificationIds = useRef(new Set<string>());
 
   useEffect(() => {
@@ -108,7 +111,7 @@ export function AppLayout() {
         </main>
       </div>
       <MobileBottomNav />
-      <ChatWidget />
+      {!onChatPage && <ChatWidget />}
     </div>
   );
 }
