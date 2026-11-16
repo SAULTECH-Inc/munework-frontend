@@ -379,6 +379,7 @@ export const whatsappApi = {
   startVerify:  (phone: string)     => api.post('/whatsapp/verify', { phone }),
   confirm:      (code: string)      => api.post('/whatsapp/verify/confirm', { code }),
   setDigest:    (frequency: string) => api.put('/whatsapp/digest', { frequency }),
+  setJobAlerts: (enabled: boolean)  => api.put('/whatsapp/job-alerts', { enabled }),
   optOut:       ()                  => api.delete('/whatsapp'),
   history:      (params?: any)      => api.get('/whatsapp/history', { params }),
 };

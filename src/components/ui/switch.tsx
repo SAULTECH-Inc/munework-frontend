@@ -5,11 +5,16 @@ interface SwitchProps {
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
   className?: string;
+  /** Lets a <label htmlFor> name the switch for screen readers. */
+  id?: string;
+  'aria-label'?: string;
 }
 
-export function Switch({ checked, onCheckedChange, disabled, className }: SwitchProps) {
+export function Switch({ checked, onCheckedChange, disabled, className, id, 'aria-label': ariaLabel }: SwitchProps) {
   return (
     <button
+      id={id}
+      aria-label={ariaLabel}
       type="button"
       role="switch"
       aria-checked={checked}

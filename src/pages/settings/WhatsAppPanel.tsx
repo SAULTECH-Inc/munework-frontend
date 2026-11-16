@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { whatsappApi } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
@@ -66,6 +67,15 @@ export function WhatsAppPanel() {
   const setDigest = useMutation({
     mutationFn: (frequency: string) => whatsappApi.setDigest(frequency),
     onSuccess: () => { toast.success('Summary schedule updated'); refresh(); },
+    onError: (e: any) => toast.error(e?.response?.data?.message ?? 'Could not update'),
+  });
+
+  const setJobAlerts = useMutation({
+    mutationFn: (enabled: boolean) => whatsappApi.setJobAlerts(enabled),
+    onSuccess: (_r, enabled) => {
+      toast.success(enabled ? 'Job matches will come to WhatsApp' : 'Job matches on WhatsApp turned off');
+      refresh();
+    },
     onError: (e: any) => toast.error(e?.response?.data?.message ?? 'Could not update'),
   });
 
@@ -137,6 +147,31 @@ export function WhatsAppPanel() {
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Disconnect
               </Button>
             </div>
+
+            {!isEmployer && (
+              <div className="rounded-lg border border-border p-3 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <label htmlFor="wa-job-alerts" className="text-xs font-semibold text-foreground">
+                      Job matches on WhatsApp
+                    </label>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                      Your best new matches a few times a week. Tap <span className="font-semibold">Apply</span> right
+                      in the chat and we'll use your CV on file, or send a new one there.
+                    </p>
+                  </div>
+                  <Switch
+                    id="wa-job-alerts"
+                    checked={Boolean(data.jobAlerts)}
+                    disabled={setJobAlerts.isPending}
+                    onCheckedChange={(v) => setJobAlerts.mutate(v)}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Tip: message <span className="font-semibold">help</span> to us on WhatsApp to see everything you can do there.
+                </p>
+              </div>
+            )}
 
             {isEmployer && (
               <div>
@@ -228,7 +263,9 @@ export function WhatsAppPanel() {
         <div className="flex items-start gap-2 pt-3 border-t border-border">
           <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            We only message you about your own {isEmployer ? 'roles' : 'applications'}, never marketing.
+            {isEmployer
+              ? 'We only message you about your own roles, never marketing.'
+              : 'Application updates are always about your own applications. Job matches only come if you switch them on.'}{' '}
             You can disconnect at any time, and replying STOP on WhatsApp works too.
           </p>
         </div>
