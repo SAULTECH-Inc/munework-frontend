@@ -32,6 +32,7 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
   const companyRaw = job.employer?.companyName || job.company || 'Company';
   const cleanCompanyName = companyRaw.replace(/^[\$\s\W]+/, '').trim() || 'Company';
   const matchInfo = getMatchScoreBadge(job.aiMatchScore ?? job.matchScore);
+  const isEmailApplication = job.applicationMethod?.externalUrl?.toLowerCase().startsWith('mailto:') ?? false;
 
   return (
     <Dialog open={true} onOpenChange={v => { if (!v) onClose(); }}>
@@ -237,7 +238,7 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
             onClick={() => { onApply(); onClose(); }}
             disabled={job.hasApplied}
           >
-            {job.hasApplied ? 'Application Submitted' : <><Zap className="h-4 w-4 mr-2" /> Apply Now</>}
+            {job.hasApplied ? 'Application Submitted' : isEmailApplication ? 'Apply by email' : <><Zap className="h-4 w-4 mr-2" /> Apply Now</>}
           </Button>
           <Button
             variant="outline"

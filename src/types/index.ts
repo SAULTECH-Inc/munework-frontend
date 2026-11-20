@@ -239,7 +239,7 @@ export interface Job {
   location: string;
   jobType: JobType;
   /** Entity field: employmentType (remote/onsite/hybrid) */
-  employmentType?: WorkMode;
+  employmentType?: WorkMode | 'unspecified';
   /** Entity field: level (intern/junior/mid/senior/lead/manager/executive) */
   level?: JobLevel;
   /** Entity field: jobStatus */

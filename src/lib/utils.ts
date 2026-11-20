@@ -134,6 +134,7 @@ export const EMPLOYMENT_TYPE_LABEL: Record<string, string> = {
   remote: 'Remote',
   onsite: 'On-site',
   hybrid: 'Hybrid',
+  unspecified: 'Not specified',
 };
 
 export const LEVEL_LABEL: Record<string, string> = {

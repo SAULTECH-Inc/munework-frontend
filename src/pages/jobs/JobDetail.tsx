@@ -88,6 +88,7 @@ export default function JobDetailPage() {
   // External jobs are applied to off-platform: send the applicant to the
   // employer's URL in a new tab instead of opening the in-app application flow.
   const isExternal = !!job?.applicationMethod?.external && !!job?.applicationMethod?.externalUrl;
+  const isEmailExternal = !!job?.applicationMethod?.externalUrl?.toLowerCase().startsWith('mailto:');
 
   // The employer may require a minimum match score to apply. The server also
   // enforces this; the UI just avoids a pointless attempt and explains why.
@@ -230,7 +231,7 @@ export default function JobDetailPage() {
             <p className="text-xs text-muted-foreground">{companyName}</p>
           </div>
           <Button size="sm" onClick={startApply} disabled={!isExternal && (job.hasApplied || belowThreshold)} className="shrink-0">
-            {isExternal ? <><ExternalLink className="h-3.5 w-3.5 mr-1.5" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Applied</> : 'Apply Now'}
+            {isExternal ? isEmailExternal ? 'Apply by email' : <><ExternalLink className="h-3.5 w-3.5 mr-1.5" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Applied</> : 'Apply Now'}
           </Button>
         </div>
       )}
@@ -314,7 +315,7 @@ export default function JobDetailPage() {
                     disabled={!isExternal && (job.hasApplied || belowThreshold)}
                     className={cn('gap-2 font-bold px-5', job.hasApplied && 'bg-success/20 text-success border border-success/30 hover:bg-success/20')}
                   >
-                    {isExternal ? <><ExternalLink className="h-4 w-4" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-4 w-4" />Applied</> : <><Zap className="h-4 w-4" />Apply Now</>}
+                    {isExternal ? isEmailExternal ? 'Apply by email' : <><ExternalLink className="h-4 w-4" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-4 w-4" />Applied</> : <><Zap className="h-4 w-4" />Apply Now</>}
                   </Button>
                 )}
               </div>
@@ -404,12 +405,14 @@ export default function JobDetailPage() {
                     {job.hasApplied
                       ? "You've already applied. We'll keep you updated."
                       : isExternal
-                        ? 'Continue to the employer’s website to apply. MuneWork won’t send your profile or vetting evidence.'
+                        ? isEmailExternal
+                          ? 'Your email app will open with the hiring contact ready. MuneWork does not send your CV or cover letter.'
+                          : 'Continue to the employer’s website to apply. MuneWork won’t send your profile or vetting evidence.'
                         : 'Apply in under 2 minutes using your saved CV and cover letter.'}
                   </p>
                 </div>
                 <Button onClick={startApply} disabled={!isExternal && (job.hasApplied || belowThreshold)} size="sm" className="shrink-0">
-                  {isExternal ? 'Apply externally' : job.hasApplied ? 'Applied' : 'Apply Now'}
+                  {isExternal ? isEmailExternal ? 'Apply by email' : 'Apply externally' : job.hasApplied ? 'Applied' : 'Apply Now'}
                 </Button>
               </div>
             )}

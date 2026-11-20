@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search, SlidersHorizontal, MapPin, Clock, Bookmark, BookmarkCheck, Zap, X, Sparkles,
-  TrendingUp, ChevronDown, ChevronUp, Building2, AlertCircle, DollarSign, Filter, Grid, List,
+  TrendingUp, ChevronDown, ChevronUp, Building2, AlertCircle, DollarSign, Filter, Grid, List, Mail,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,7 @@ import { QuickApplyModal } from './QuickApplyModal';
 import { jobsApi } from '@/lib/api';
 import { daysUntilDateOnly } from '@/lib/date-only';
 import { useJobMatchScores } from '@/hooks/useJobMatchScores';
-import { cn, formatSalary, timeAgo, JOB_TYPE_LABEL, getInitials, getMatchScoreBadge } from '@/lib/utils';
+import { cn, formatSalary, timeAgo, JOB_TYPE_LABEL, EMPLOYMENT_TYPE_LABEL, getInitials, getMatchScoreBadge } from '@/lib/utils';
 import { COUNTRIES } from '@/lib/profile-data';
 import type { Job } from '@/types';
 import { TopBar } from '@/components/common/TopBar';
@@ -114,6 +114,15 @@ export default function JobsPage() {
 
   const total = (data?.pages?.[0] as any)?.total ?? allJobs.length;
   const hasMore = activeTab === 'all' && !!hasNextPage;
+
+  function handleApply(job: Job) {
+    const destination = job.applicationMethod?.external && job.applicationMethod.externalUrl;
+    if (destination) {
+      window.open(destination, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setApplyJob(job);
+  }
 
   const toggleBookmark = useMutation({
     mutationFn: (jobId: string) => jobsApi.toggleBookmark(jobId),
@@ -425,7 +434,7 @@ export default function JobsPage() {
                   showMatchScore={isApplicant}
                   matchScoreStatus={matchScoreStatus}
                   onSelect={() => setSelectedJob(job)}
-                  onApply={() => setApplyJob(job)}
+                  onApply={() => handleApply(job)}
                   onBookmark={() => toggleBookmark.mutate(job.id)}
                 />
               ))}
@@ -450,7 +459,7 @@ export default function JobsPage() {
         <JobDetailDrawer
           job={selectedJob}
           onClose={() => setSelectedJob(null)}
-          onApply={() => setApplyJob(selectedJob)}
+          onApply={() => handleApply(selectedJob)}
         />
       )}
 
@@ -536,6 +545,7 @@ export function JobCard({ job, selected, compact, showMatchScore, matchScoreStat
         ? isCuratedExternal ? 'Listing expires today' : 'Due today'
         : isCuratedExternal ? `Expires in ${daysLeft}d` : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`;
   const descriptionText = job.description ? stripHtml(job.description) : '';
+  const isEmailApplication = job.applicationMethod?.externalUrl?.toLowerCase().startsWith('mailto:') ?? false;
 
   const companyRaw = job.employer?.companyName || job.company || 'Company';
   const cleanCompanyName = companyRaw.replace(/^[\$\s\W]+/, '').trim() || 'Company';
@@ -641,7 +651,7 @@ export function JobCard({ job, selected, compact, showMatchScore, matchScoreStat
           )}
           {job.employmentType && (
             <Badge variant="outline" className="text-xs px-2.5 py-0.5 rounded-lg capitalize border-primary/20 bg-primary/5 text-primary">
-              {job.employmentType}
+              {EMPLOYMENT_TYPE_LABEL[job.employmentType] ?? job.employmentType}
             </Badge>
           )}
           {job.level && (
@@ -692,7 +702,9 @@ export function JobCard({ job, selected, compact, showMatchScore, matchScoreStat
             disabled={job.hasApplied}
             className="text-xs h-8 px-4 rounded-xl font-bold shadow-sm"
           >
-            {job.hasApplied ? 'Applied' : <><Zap className="h-3.5 w-3.5 mr-1" /> Apply</>}
+            {job.hasApplied ? 'Applied' : isEmailApplication
+              ? <><Mail className="h-3.5 w-3.5 mr-1" /> Apply by email</>
+              : <><Zap className="h-3.5 w-3.5 mr-1" /> Apply</>}
           </Button>
         </div>
       </div>
