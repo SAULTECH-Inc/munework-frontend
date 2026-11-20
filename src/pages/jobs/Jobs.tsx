@@ -25,7 +25,7 @@ import { BrowseJobsBy } from '@/components/common/BrowseJobsBy';
 
 const COUNTRY_OPTIONS = COUNTRIES.map(c => ({ label: c, value: c }));
 
-const JOB_TYPES = ['full_time', 'part_time', 'contract', 'freelance', 'internship'];
+const JOB_TYPES = ['unspecified', 'full_time', 'part_time', 'contract', 'freelance', 'internship'];
 const WORK_MODES = ['remote', 'hybrid', 'onsite'];
 const EXPERIENCE = ['intern', 'junior', 'mid', 'senior', 'lead', 'manager'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'NGN', 'CAD', 'AUD'];

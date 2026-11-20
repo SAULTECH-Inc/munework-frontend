@@ -2,7 +2,7 @@
 
 export type UserType = 'applicant' | 'employer' | 'admin';
 export type UserStatus = 'active' | 'inactive' | 'blocked' | 'pending_verification' | 'verified' | 'suspended';
-export type JobType = 'full_time' | 'part_time' | 'contract' | 'freelance' | 'internship' | 'temporary' | 'volunteer';
+export type JobType = 'unspecified' | 'full_time' | 'part_time' | 'contract' | 'freelance' | 'internship' | 'temporary' | 'volunteer';
 export type WorkMode = 'remote' | 'onsite' | 'hybrid';
 export type JobLevel = 'intern' | 'junior' | 'mid' | 'senior' | 'lead' | 'manager' | 'executive';
 export type JobStatus = 'draft' | 'posted' | 'active' | 'paused' | 'closed' | 'expired' | 'archived';

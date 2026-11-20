@@ -121,6 +121,7 @@ export function scoreBg(score: number) {
 }
 
 export const JOB_TYPE_LABEL: Record<string, string> = {
+  unspecified: 'Not specified',
   full_time: 'Full-time',
   part_time: 'Part-time',
   contract: 'Contract',
