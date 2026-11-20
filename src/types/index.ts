@@ -246,6 +246,10 @@ export interface Job {
   jobStatus?: JobStatus;
   /** Kept for backward-compat reads; prefer jobStatus */
   status?: JobStatus;
+  /** Curated external roles are published before an employer claims an account. */
+  listingSource?: 'employer' | 'curated_external';
+  sourceUrl?: string;
+  sourceCheckedAt?: string;
   salaryRange?: SalaryRange;
   /** Entity field: endDate — the application deadline */
   endDate?: string;

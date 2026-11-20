@@ -527,13 +527,14 @@ export function JobCard({ job, selected, compact, showMatchScore, matchScoreStat
 
   const daysLeft = daysUntilDateOnly(job.endDate);
   const isUrgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 3;
+  const isCuratedExternal = job.listingSource === 'curated_external';
   const deadlineLabel = daysLeft === null
     ? (job.endDate ? null : 'No deadline')
     : daysLeft < 0
-      ? 'Deadline passed'
+      ? isCuratedExternal ? 'Listing expired' : 'Deadline passed'
       : daysLeft === 0
-        ? 'Due today'
-        : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`;
+        ? isCuratedExternal ? 'Listing expires today' : 'Due today'
+        : isCuratedExternal ? `Expires in ${daysLeft}d` : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`;
   const descriptionText = job.description ? stripHtml(job.description) : '';
 
   const companyRaw = job.employer?.companyName || job.company || 'Company';
@@ -573,15 +574,20 @@ export function JobCard({ job, selected, compact, showMatchScore, matchScoreStat
                   {deadlineLabel}
                 </span>
               )}
+              {job.listingSource === 'curated_external' && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  External listing
+                </span>
+              )}
             </div>
 
-            <button
-              onClick={e => { e.stopPropagation(); job.employer?.id && navigate(`/profile/employer/${job.employer.id}`); }}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 mt-1 font-medium"
+            <div
+              onClick={job.employer?.id ? (e) => { e.stopPropagation(); navigate(`/profile/employer/${job.employer!.id}`); } : undefined}
+              className={cn('text-xs text-muted-foreground flex items-center gap-1.5 mt-1 font-medium', job.employer?.id && 'hover:text-primary transition-colors cursor-pointer')}
             >
               <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
               <span>{cleanCompanyName}</span>
-            </button>
+            </div>
           </div>
         </div>
 

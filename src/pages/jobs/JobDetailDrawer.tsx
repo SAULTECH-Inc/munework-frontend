@@ -68,6 +68,12 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
                     <span className="text-[11px] text-muted-foreground">· {job.employer.industry}</span>
                   )}
                 </div>
+                {job.listingSource === 'curated_external' && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">MuneWork-curated · external</span>
+                    {job.sourceUrl && <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()} className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-primary"><ExternalLink className="h-3 w-3" />Source</a>}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -147,7 +153,7 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
             </div>
             {job.endDate && (
               <div className="text-right">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Deadline</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{job.listingSource === 'curated_external' ? 'MuneWork listing expires' : 'Deadline'}</p>
                 <p className="text-xs font-bold text-foreground mt-0.5 font-['Outfit',sans-serif]">
                   {new Date(job.endDate).toLocaleDateString()}
                 </p>
@@ -159,10 +165,9 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
           {job.description && (
             <section className="space-y-2">
               <h3 className="text-sm font-bold text-foreground font-['Outfit',sans-serif]">About the Role</h3>
-              <div
-                className="text-xs text-muted-foreground leading-relaxed rich-content [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_strong]:text-foreground [&_strong]:font-semibold"
-                dangerouslySetInnerHTML={{ __html: job.description }}
-              />
+              {job.listingSource === 'curated_external'
+                ? <p className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{job.description}</p>
+                : <div className="text-xs text-muted-foreground leading-relaxed rich-content [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_strong]:text-foreground [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: job.description }} />}
             </section>
           )}
 
@@ -170,10 +175,9 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
           {job.responsibility && (
             <section className="space-y-2">
               <h3 className="text-sm font-bold text-foreground font-['Outfit',sans-serif]">Responsibilities</h3>
-              <div
-                className="text-xs text-muted-foreground leading-relaxed [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_strong]:text-foreground [&_strong]:font-semibold"
-                dangerouslySetInnerHTML={{ __html: job.responsibility }}
-              />
+              {job.listingSource === 'curated_external'
+                ? <p className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{job.responsibility}</p>
+                : <div className="text-xs text-muted-foreground leading-relaxed [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_strong]:text-foreground [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: job.responsibility }} />}
             </section>
           )}
 
@@ -181,10 +185,9 @@ export function JobDetailDrawer({ job, onClose, onApply }: Props) {
           {job.requirements && (
             <section className="space-y-2">
               <h3 className="text-sm font-bold text-foreground font-['Outfit',sans-serif]">Requirements</h3>
-              <div
-                className="text-xs text-muted-foreground leading-relaxed [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_strong]:text-foreground [&_strong]:font-semibold"
-                dangerouslySetInnerHTML={{ __html: job.requirements }}
-              />
+              {job.listingSource === 'curated_external'
+                ? <p className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{job.requirements}</p>
+                : <div className="text-xs text-muted-foreground leading-relaxed [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1 [&_strong]:text-foreground [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: job.requirements }} />}
             </section>
           )}
 

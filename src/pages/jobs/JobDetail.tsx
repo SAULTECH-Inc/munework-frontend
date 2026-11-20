@@ -227,7 +227,7 @@ export default function JobDetailPage() {
         )}>
           <div className="min-w-0">
             <p className="text-sm font-bold truncate">{job.title}</p>
-            <p className="text-xs text-muted-foreground">{job.employer?.companyName}</p>
+            <p className="text-xs text-muted-foreground">{companyName}</p>
           </div>
           <Button size="sm" onClick={startApply} disabled={!isExternal && (job.hasApplied || belowThreshold)} className="shrink-0">
             {isExternal ? <><ExternalLink className="h-3.5 w-3.5 mr-1.5" />Apply externally</> : job.hasApplied ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />Applied</> : 'Apply Now'}
@@ -257,7 +257,7 @@ export default function JobDetailPage() {
               <Avatar className="h-16 w-16 rounded-2xl ring-4 ring-surface shadow-xl shrink-0">
                 <AvatarImage src={job.employer?.companyLogo} />
                 <AvatarFallback className="rounded-2xl text-xl font-black bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
-                  {job.employer?.companyName?.[0] ?? 'C'}
+                  {companyName?.[0] ?? 'C'}
                 </AvatarFallback>
               </Avatar>
               {matchBadge && (
@@ -271,14 +271,24 @@ export default function JobDetailPage() {
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-black text-foreground leading-tight">{job.title}</h1>
-                <button
-                  onClick={() => job.employer?.id && navigate(`/profile/employer/${job.employer.id}`)}
-                  className="text-sm text-primary hover:underline mt-1 flex items-center gap-1 font-medium"
-                >
-                  <Building2 className="h-3.5 w-3.5" />
-                  {job.employer?.companyName ?? job.company}
-                  <ChevronRight className="h-3 w-3 opacity-60" />
-                </button>
+                {job.employer?.id ? (
+                  <button
+                    onClick={() => navigate(`/profile/employer/${job.employer!.id}`)}
+                    className="text-sm text-primary hover:underline mt-1 flex items-center gap-1 font-medium"
+                  >
+                    <Building2 className="h-3.5 w-3.5" />{companyName}<ChevronRight className="h-3 w-3 opacity-60" />
+                  </button>
+                ) : (
+                  <div className="text-sm text-muted-foreground mt-1 flex items-center gap-1 font-medium">
+                    <Building2 className="h-3.5 w-3.5" />{companyName}
+                  </div>
+                )}
+                {job.listingSource === 'curated_external' && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">MuneWork-curated · external application</span>
+                    {job.sourceUrl && <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-primary"><ExternalLink className="h-3 w-3" />Original listing</a>}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
@@ -319,7 +329,7 @@ export default function JobDetailPage() {
               <Chip><Clock className="h-3 w-3" />{timeAgo(job.createdAt)}</Chip>
               {job.endDate && (
                 <Chip variant={isExpiring ? 'success' : 'default'}>
-                  <Calendar className="h-3 w-3" />Deadline: {new Date(job.endDate).toLocaleDateString()}
+                  <Calendar className="h-3 w-3" />{job.listingSource === 'curated_external' ? 'MuneWork listing expires: ' : 'Deadline: '}{new Date(job.endDate).toLocaleDateString()}
                 </Chip>
               )}
             </div>
@@ -332,21 +342,27 @@ export default function JobDetailPage() {
             {job.description && (
               <div className="glass rounded-2xl border border-border/50 p-6">
                 <SectionHeading>Job Description</SectionHeading>
-                <div className={htmlClasses} dangerouslySetInnerHTML={{ __html: job.description }} />
+                {job.listingSource === 'curated_external'
+                  ? <p className={cn(htmlClasses, 'whitespace-pre-line')}>{job.description}</p>
+                  : <div className={htmlClasses} dangerouslySetInnerHTML={{ __html: job.description }} />}
               </div>
             )}
 
             {job.requirements && (
               <div className="glass rounded-2xl border border-border/50 p-6">
                 <SectionHeading>Requirements</SectionHeading>
-                <div className={htmlClasses} dangerouslySetInnerHTML={{ __html: job.requirements }} />
+                {job.listingSource === 'curated_external'
+                  ? <p className={cn(htmlClasses, 'whitespace-pre-line')}>{job.requirements}</p>
+                  : <div className={htmlClasses} dangerouslySetInnerHTML={{ __html: job.requirements }} />}
               </div>
             )}
 
             {job.responsibility && (
               <div className="glass rounded-2xl border border-border/50 p-6">
                 <SectionHeading>Responsibilities</SectionHeading>
-                <div className={htmlClasses} dangerouslySetInnerHTML={{ __html: job.responsibility }} />
+                {job.listingSource === 'curated_external'
+                  ? <p className={cn(htmlClasses, 'whitespace-pre-line')}>{job.responsibility}</p>
+                  : <div className={htmlClasses} dangerouslySetInnerHTML={{ __html: job.responsibility }} />}
               </div>
             )}
 
@@ -385,7 +401,11 @@ export default function JobDetailPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold">{job.hasApplied ? 'Application submitted ✓' : 'Ready to apply?'}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {job.hasApplied ? "You've already applied. We'll keep you updated." : 'Apply in under 2 minutes using your saved CV and cover letter.'}
+                    {job.hasApplied
+                      ? "You've already applied. We'll keep you updated."
+                      : isExternal
+                        ? 'Continue to the employer’s website to apply. MuneWork won’t send your profile or vetting evidence.'
+                        : 'Apply in under 2 minutes using your saved CV and cover letter.'}
                   </p>
                 </div>
                 <Button onClick={startApply} disabled={!isExternal && (job.hasApplied || belowThreshold)} size="sm" className="shrink-0">
@@ -430,6 +450,14 @@ export default function JobDetailPage() {
               </div>
             )}
 
+            {!job.employer && job.listingSource === 'curated_external' && (
+              <div className="glass rounded-2xl border border-border/50 p-5 space-y-3">
+                <SectionHeading>External listing</SectionHeading>
+                <p className="text-xs leading-relaxed text-muted-foreground">MuneWork curated this opportunity. The employer has not claimed a MuneWork account, and applications are submitted on the employer’s site.</p>
+                {job.sourceUrl && <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"><ExternalLink className="h-3.5 w-3.5" />View original job listing</a>}
+              </div>
+            )}
+
             <div className="glass rounded-2xl border border-border/50 p-5">
               <SectionHeading>Job Details</SectionHeading>
               <div>
@@ -439,7 +467,7 @@ export default function JobDetailPage() {
                 <DetailRow icon={MapPin} label="Location" value={job.location} />
                 {job.salaryRange && <DetailRow icon={DollarSign} label="Salary" value={formatSalary(job.salaryRange)} highlight />}
                 <DetailRow icon={Calendar} label="Posted" value={timeAgo(job.createdAt)} />
-                {job.endDate && <DetailRow icon={Clock} label="Deadline" value={new Date(job.endDate).toLocaleDateString()} />}
+                {job.endDate && <DetailRow icon={Clock} label={job.listingSource === 'curated_external' ? 'MuneWork expiry' : 'Deadline'} value={new Date(job.endDate).toLocaleDateString()} />}
               </div>
             </div>
 
